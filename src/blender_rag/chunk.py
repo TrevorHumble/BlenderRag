@@ -192,6 +192,21 @@ def chunk_python(doc: Document) -> Iterator[Chunk]:
         yield Chunk.from_document(doc, code, idx, extra={"symbol": name, "line": line})
 
 
+def chunk_api(doc: Document, *, max_chars: int, overlap_chars: int) -> Iterator[Chunk]:
+    """One chunk per API symbol (split only if oversized).
+
+    A bpy API Document is already a single symbol — a self-contained unit — so
+    we do NOT apply the prose min-length filter (``min_chars=0``); otherwise
+    thousands of terse but valid attribute/property entries would be dropped.
+    Symbol/kind metadata flows through from ``doc.extra``.
+    """
+    texts = pack_section(
+        (), doc.text, max_chars=max_chars, overlap_chars=overlap_chars, min_chars=0
+    )
+    for idx, text in enumerate(texts):
+        yield Chunk.from_document(doc, text, idx)
+
+
 # --------------------------------------------------------------------------- #
 # Routing
 # --------------------------------------------------------------------------- #
@@ -205,6 +220,8 @@ def chunk_document(doc: Document, cfg: Config | None = None) -> Iterator[Chunk]:
 
     if doc.source_type in _CODE_TYPES:
         yield from chunk_python(doc)
+    elif doc.source_type is SourceType.API:
+        yield from chunk_api(doc, max_chars=max_chars, overlap_chars=overlap_chars)
     else:  # markdown/prose is the default
         yield from chunk_markdown(
             doc, max_chars=max_chars, overlap_chars=overlap_chars, min_chars=min_chars

@@ -45,6 +45,21 @@ def test_split_python_symbols():
     assert "primitive_cube_add" in syms[1][1]
 
 
+def test_api_short_symbol_is_not_dropped():
+    # a terse attribute entry, well under the prose min-chunk threshold
+    api_doc = Document.create(
+        text="bpy.types.Object.name (str) The object's name.",
+        source_type=SourceType.API,
+        source_url="u",
+        title="bpy.types.Object.name",
+        extra={"symbol": "bpy.types.Object.name", "kind": "attribute"},
+    )
+    chunks = list(chunk_document(api_doc))
+    assert len(chunks) == 1
+    assert chunks[0].extra["kind"] == "attribute"
+    assert "object's name" in chunks[0].text.lower()
+
+
 def test_chunk_document_routes_by_type():
     md_doc = Document.create(
         text=(
