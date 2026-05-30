@@ -1,56 +1,58 @@
 # Retrieval eval results
 
-Run with `uv run python scripts/eval.py` over `eval/queries.jsonl` (28 labeled
-queries, k=5). Metrics defined in `src/blender_rag/evaluate.py`.
+Run with `uv run python scripts/eval.py` over `eval/queries.jsonl` (54 labeled
+queries, k=5). Metrics defined in `src/blender_rag/evaluate.py`. Index: full
+5 sources, 32,279 chunks.
 
-## Full index — 5 sources, 32,279 chunks
+## Results (54 queries)
 
 | config | hit@k | recall@k | MRR |
 |--------|------:|---------:|----:|
-| vector-only | 0.821 | 0.821 | 0.618 |
-| hybrid (dense + BM25) | 0.857 | 0.857 | **0.640** |
-| hybrid + rerank | 0.857 | 0.857 | 0.635 |
+| vector-only | 0.722 | 0.722 | 0.522 |
+| hybrid (dense + BM25) | **0.759** | **0.759** | **0.550** |
+| hybrid + rerank | 0.759 | 0.759 | 0.527 |
 
 Per-source (hybrid + rerank):
 
 | source | hit@k | MRR | n |
 |--------|------:|----:|--:|
-| manual | 1.000 | 0.900 | 5 |
-| release_notes | 1.000 | 0.867 | 5 |
-| dev_docs | 1.000 | 0.667 | 2 |
+| manual | 1.000 | 0.929 | 7 |
+| dev_docs | 1.000 | 0.778 | 3 |
 | blendermcp | 1.000 | 0.667 | 2 |
-| api | 0.714 | 0.449 | 14 |
+| release_notes | 0.857 | 0.690 | 7 |
+| api | 0.657 | 0.385 | 35 |
 
 ## Findings
 
-**1. The reranker is not earning its latency on this set.** Hybrid+rerank MRR is
-*lower* than hybrid alone here (0.635 vs 0.640) and was barely higher on the
-earlier 3-source run (0.558 vs 0.551). Both deltas are within noise on 28 queries.
-Verdict: no reliable benefit yet — either the corpus/query style doesn't need it,
-or the eval set is too small to detect it. Don't trust it until measured on a
-larger set; consider making it optional/off by default.
+**1. The reranker does not earn its latency — now with stronger evidence.**
+Across both the 28- and 54-query sets, hybrid+rerank has the *same* hit@k as plain
+hybrid and a *lower* MRR (0.527 vs 0.550 here; 0.635 vs 0.640 on the 28-set). It
+loads a ~600M cross-encoder and runs it on every query for a measurable
+*regression* in ranking. Caveat: this set is API-heavy (35/54) and the prose
+sources are already at ceiling (manual/dev_docs at 1.000), so the reranker may
+still help query types this set under-samples. Recommendation: it is a one-line
+config change to disable (`embedding.reranker: null`); flip it off unless a
+prose-heavy eval shows it helping. Tracked in #27.
 
-**2. Hybrid clearly beats vector-only** (0.821 -> 0.857): the BM25 half earns its
-place, mostly by nailing exact operator/symbol names.
+**2. Hybrid clearly beats vector-only** (hit@k 0.722 -> 0.759, MRR 0.522 -> 0.550).
+The BM25 half pulls real weight on exact operator/symbol names.
 
-**3. manual, release_notes, dev_docs, blendermcp are effectively solved** (perfect
-hit@k). blendermcp only works because the code-chunk cap (#25) stopped the
-embedder from truncating the addon into one giant blob.
+**3. Non-API sources are effectively solved** (manual/dev_docs/blendermcp 1.000,
+release_notes 0.857).
 
-**4. The 4 "api misses" are mostly good behavior, not failures.** For general
-phrasings like "create a subdivision surface modifier", the **manual** page wins
-the top-5 (score 0.99) over the API type `bpy.types.SubsurfModifier` — a fine
-answer. Adding the tool's `source_type="api"` filter recovers 2 of the 4
-(`SubsurfModifier` -> rank 1, `subdivision_set` -> rank 3).
-
-**5. Two genuine ranking gaps remain** even with the API filter:
-`object.select_all` and `transform.translate` are outranked by sibling operators
-(many `select_*` / `transform.*` exist). These are the real, narrow weak spots —
-candidates for a symbol-name boost or larger code top-k.
+**4. The API recall gap is the real, sized problem: 0.657 over 35 queries.**
+Two distinct causes:
+- **Manual outranks the API symbol** for general phrasings ("create a subdivision
+  surface modifier" -> the manual page wins; `source_type="api"` recovers it).
+- **Sibling operators outrank the target** within the API itself
+  (`object.select_all`, `transform.translate`, `mesh.inset`, `render.render`,
+  `wm.save_mainfile`, ...). The leaf name matches the query but is buried under
+  many `select_*` / `mesh.*` / `wm.*` neighbors. This is the lead for a
+  symbol-name boost (#27).
 
 ## Caveats
 
-- 28 queries is small; treat as directional. The reranker verdict especially
-  needs a larger set to be conclusive.
-- Labeling (which doc is "the" right answer) is one person's judgment — finding #4
-  shows the API/manual answer boundary is genuinely fuzzy.
+- 54 queries, API-heavy. Directional, and the reranker verdict is conditional on
+  query mix (see finding #1).
+- Labeling is one person's judgment; the API/manual answer boundary is genuinely
+  fuzzy (finding #4, first bullet).

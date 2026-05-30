@@ -26,3 +26,29 @@
 {"query": "guidelines for triaging incoming bug reports", "type": "dev_docs", "expect": ["bug_reports"]}
 {"query": "blendermcp blender addon source code", "type": "blendermcp", "expect": ["addon.py"]}
 {"query": "blendermcp mcp server implementation", "type": "blendermcp", "expect": ["server.py"]}
+{"query": "rotate an object with python", "type": "api", "expect": ["transform.rotate"]}
+{"query": "scale an object using an operator", "type": "api", "expect": ["transform.resize"]}
+{"query": "duplicate the selected objects", "type": "api", "expect": ["object.duplicate"]}
+{"query": "add a plane mesh", "type": "api", "expect": ["primitive_plane_add"]}
+{"query": "add a cylinder primitive", "type": "api", "expect": ["primitive_cylinder_add"]}
+{"query": "add an ico sphere", "type": "api", "expect": ["primitive_ico_sphere_add"]}
+{"query": "switch the object interaction mode", "type": "api", "expect": ["object.mode_set"]}
+{"query": "inset faces in edit mode", "type": "api", "expect": ["mesh.inset"]}
+{"query": "bevel the selected edges", "type": "api", "expect": ["mesh.bevel"]}
+{"query": "subdivide the selected edges", "type": "api", "expect": ["mesh.subdivide"]}
+{"query": "separate a mesh into parts", "type": "api", "expect": ["mesh.separate"]}
+{"query": "set the object origin", "type": "api", "expect": ["object.origin_set"]}
+{"query": "parent one object to another", "type": "api", "expect": ["object.parent_set"]}
+{"query": "render the current frame", "type": "api", "expect": ["render.render"]}
+{"query": "save the current blend file", "type": "api", "expect": ["wm.save_mainfile"]}
+{"query": "open a blend file", "type": "api", "expect": ["wm.open_mainfile"]}
+{"query": "recalculate mesh normals consistently", "type": "api", "expect": ["normals_make_consistent"]}
+{"query": "add a mirror modifier", "type": "api", "expect": ["MirrorModifier"]}
+{"query": "add an array modifier", "type": "api", "expect": ["ArrayModifier"]}
+{"query": "add a solidify modifier", "type": "api", "expect": ["SolidifyModifier"]}
+{"query": "add a boolean modifier", "type": "api", "expect": ["BooleanModifier"]}
+{"query": "proportional editing of vertices", "type": "manual", "expect": ["proportional"]}
+{"query": "unwrap a mesh for uv mapping", "type": "manual", "expect": ["unwrap"]}
+{"query": "eevee rendering changes in blender 5.1", "type": "release_notes", "expect": ["release_notes/5.1/eevee"], "filter": {"blender_version": "5.1"}}
+{"query": "cycles changes in blender 5.0", "type": "release_notes", "expect": ["release_notes/5.0/cycles"], "filter": {"blender_version": "5.0"}}
+{"query": "how to set up a development environment", "type": "dev_docs", "expect": ["handbook"]}
