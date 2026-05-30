@@ -81,8 +81,11 @@ and the embedding/reranker models. Re-runs are incremental and idempotent.
 
 ## Connect to Claude Code
 
-The repo ships a project-scoped `.mcp.json`. Open the project in Claude Code and
-approve the `blender-docs` server when prompted. It exposes one tool:
+The repo ships a project-scoped `.mcp.json` and a
+[`blender-docs` skill](.claude/skills/blender-docs/SKILL.md) that teaches an agent
+*when* and *how* to call the tool (which `source_type` to use, citing sources, etc.).
+Open the project in Claude Code and approve the `blender-docs` server when prompted.
+It exposes one tool:
 
 ```
 search_blender_docs(query, top_k=6, source_type=None, blender_version=None)
