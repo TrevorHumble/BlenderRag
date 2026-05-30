@@ -1,0 +1,12 @@
+# Normalize line endings: store LF in the repo, check out native on Windows.
+# Stops the "LF will be replaced by CRLF" warnings on every commit.
+* text=auto
+
+*.py   text eol=lf
+*.toml text eol=lf
+*.yaml text eol=lf
+*.yml  text eol=lf
+*.json text eol=lf
+*.md   text eol=lf
+*.cfg  text eol=lf
+*.txt  text eol=lf
