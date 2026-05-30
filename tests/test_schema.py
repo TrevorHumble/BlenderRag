@@ -45,6 +45,17 @@ def test_chunk_from_document_inherits_metadata():
     assert chunk.extra == {"version": "5.1", "section": "Sequencer"}
 
 
+def test_chunk_ids_distinguish_position_and_full_text():
+    doc = Document.create(text="b", source_type="manual", source_url="u", title="t")
+    # same text, different position -> different id
+    assert Chunk.from_document(doc, "same", 0).id != Chunk.from_document(doc, "same", 1).id
+    # shared 64-char prefix, different tail -> different id (no head collision)
+    head = "x" * 64
+    a = Chunk.from_document(doc, head + "ALPHA", 0)
+    b = Chunk.from_document(doc, head + "BETA", 0)
+    assert a.id != b.id
+
+
 def test_chunk_embed_text_prepends_context():
     doc = Document.create(text="b", source_type="code", source_url="u", title="t")
     plain = Chunk.from_document(doc, "def f(): ...", 0)

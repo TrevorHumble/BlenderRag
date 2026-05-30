@@ -111,8 +111,10 @@ class Chunk(BaseModel):
         context: str = "",
         extra: dict[str, Any] | None = None,
     ) -> Chunk:
-        """Create a chunk from ``doc``; id is stable per (doc, position, head)."""
-        chunk_id = stable_id(doc.id, str(index), text[:64])
+        """Create a chunk from ``doc``; id is stable per (doc, position, text)."""
+        # Hash the full text (not a prefix): repeated headers / API signatures
+        # share long prefixes and would otherwise collide and overwrite.
+        chunk_id = stable_id(doc.id, str(index), text)
         merged = dict(doc.extra)
         if extra:
             merged.update(extra)
