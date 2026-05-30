@@ -65,6 +65,17 @@ uv run ruff check .           # lint
 uv sync --group ml            # add torch + embedding stack (GPU build)
 ```
 
+## Build the index
+
+```bash
+uv run python scripts/build_all.py    # acquire -> chunk -> embed -> index
+uv run python scripts/search.py "how do I add a modifier in python"   # smoke test
+uv run python scripts/verify_mcp.py   # end-to-end MCP handshake check
+```
+
+The first run downloads the sources (~340 MB of git clones + the 88 MB API zip)
+and the embedding/reranker models. Re-runs are incremental and idempotent.
+
 ## Connect to Claude Code
 
 The repo ships a project-scoped `.mcp.json`. Open the project in Claude Code and
@@ -83,10 +94,20 @@ claude mcp add --scope user blender-docs -- `
   uv --directory C:\Users\thumb\BlenderRag run python src/blender_rag/server.py
 ```
 
-Build the index first (`uv run python scripts/build_corpus.py`, then `build_chunks.py`,
-then `build_index.py`) so the server has something to search.
+Build the index first (`uv run python scripts/build_all.py`) so the server has
+something to search.
 
 ## Status
 
-Under active construction. See the [issues](https://github.com/TrevorHumble/BlenderRag/issues)
-for the build plan.
+Working end to end. A real MCP client handshake (`scripts/verify_mcp.py`) lists
+the tool and retrieves Blender 5.1 results.
+
+**Sources indexed:** release notes (5.0 + 5.1), the full bpy API reference
+(~23k per-symbol docs), and the manual (~2,200 RST pages).
+**Retrieval:** hybrid (dense BGE-M3 + BM25) fused with RRF, then reranked by a
+bge-reranker-v2-m3 cross-encoder. Every chunk is tagged with its Blender version.
+
+Deferred (see [issues](https://github.com/TrevorHumble/BlenderRag/issues)):
+developer docs / add-on source (#4), contextual retrieval via Ollama (#8) — the
+one expensive ingestion step — and the higher-volume/ToS-flagged community
+sources (Stack Exchange, forums, YouTube).
