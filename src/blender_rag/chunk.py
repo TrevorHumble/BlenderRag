@@ -33,6 +33,7 @@ _MARKDOWN_TYPES = {
     SourceType.RELEASE_NOTES,
     SourceType.DEV_DOCS,
     SourceType.API,
+    SourceType.GOTCHAS,
 }
 _CODE_TYPES = {SourceType.CODE, SourceType.BLENDERMCP}
 
