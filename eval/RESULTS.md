@@ -3,13 +3,13 @@
 Run with `uv run python scripts/eval.py` over `eval/queries.jsonl` (28 labeled
 queries, k=5). Metrics defined in `src/blender_rag/evaluate.py`.
 
-## Latest run — index: 3 sources, 31,218 chunks (api + manual + release_notes)
+## Full index — 5 sources, 32,279 chunks
 
 | config | hit@k | recall@k | MRR |
 |--------|------:|---------:|----:|
-| vector-only | 0.679 | 0.679 | 0.544 |
-| hybrid (dense + BM25) | 0.714 | 0.714 | 0.551 |
-| hybrid + rerank | 0.714 | 0.714 | 0.558 |
+| vector-only | 0.821 | 0.821 | 0.618 |
+| hybrid (dense + BM25) | 0.857 | 0.857 | **0.640** |
+| hybrid + rerank | 0.857 | 0.857 | 0.635 |
 
 Per-source (hybrid + rerank):
 
@@ -17,30 +17,40 @@ Per-source (hybrid + rerank):
 |--------|------:|----:|--:|
 | manual | 1.000 | 0.900 | 5 |
 | release_notes | 1.000 | 0.867 | 5 |
-| api | 0.714 | 0.485 | 14 |
-| dev_docs | 0.000 | 0.000 | 2 |
-| blendermcp | 0.000 | 0.000 | 2 |
+| dev_docs | 1.000 | 0.667 | 2 |
+| blendermcp | 1.000 | 0.667 | 2 |
+| api | 0.714 | 0.449 | 14 |
 
-## Reading the numbers honestly
+## Findings
 
-- **dev_docs + blendermcp score 0.0 because they aren't in this index yet** — it
-  was built before those sources were added. They are *not* retrieval failures.
-  Excluding those 4 queries, hit@k on indexed sources is **20/24 = 0.833**.
-- **The reranker barely moves hit@k** on this set (0.714 -> 0.714); it only nudges
-  MRR (0.551 -> 0.558). On a 24-query set that is within noise. It is *not* clearly
-  earning its latency here — revisit on a larger set before trusting it.
-- **Hybrid beats vector-only** (0.679 -> 0.714): the BM25 half is pulling its weight,
-  mostly on exact operator/symbol names.
-- **manual and release_notes are effectively solved** (perfect hit@k, high MRR).
-- **api has a real recall gap** (0.714): 4 of 14 API queries miss at k=5 —
-  `SubsurfModifier`, `object.select_all`, `transform.translate`, `subdivision_set`.
-  The symbols exist in the corpus (pre-checked), so they're being out-ranked at
-  k=5 — partly by manual pages competing for the same intent. This is the clearest
-  lead for improvement (e.g. a source-aware boost, or a larger top-k for code).
+**1. The reranker is not earning its latency on this set.** Hybrid+rerank MRR is
+*lower* than hybrid alone here (0.635 vs 0.640) and was barely higher on the
+earlier 3-source run (0.558 vs 0.551). Both deltas are within noise on 28 queries.
+Verdict: no reliable benefit yet — either the corpus/query style doesn't need it,
+or the eval set is too small to detect it. Don't trust it until measured on a
+larger set; consider making it optional/off by default.
+
+**2. Hybrid clearly beats vector-only** (0.821 -> 0.857): the BM25 half earns its
+place, mostly by nailing exact operator/symbol names.
+
+**3. manual, release_notes, dev_docs, blendermcp are effectively solved** (perfect
+hit@k). blendermcp only works because the code-chunk cap (#25) stopped the
+embedder from truncating the addon into one giant blob.
+
+**4. The 4 "api misses" are mostly good behavior, not failures.** For general
+phrasings like "create a subdivision surface modifier", the **manual** page wins
+the top-5 (score 0.99) over the API type `bpy.types.SubsurfModifier` — a fine
+answer. Adding the tool's `source_type="api"` filter recovers 2 of the 4
+(`SubsurfModifier` -> rank 1, `subdivision_set` -> rank 3).
+
+**5. Two genuine ranking gaps remain** even with the API filter:
+`object.select_all` and `transform.translate` are outranked by sibling operators
+(many `select_*` / `transform.*` exist). These are the real, narrow weak spots —
+candidates for a symbol-name boost or larger code top-k.
 
 ## Caveats
 
-- 28 queries is small; treat these as directional, not definitive.
-- Expectations were pre-validated against `corpus.jsonl`, so a miss is a genuine
-  ranking failure, not a typo — but the *labeling* (which doc is "the" right answer)
-  is one person's judgment.
+- 28 queries is small; treat as directional. The reranker verdict especially
+  needs a larger set to be conclusive.
+- Labeling (which doc is "the" right answer) is one person's judgment — finding #4
+  shows the API/manual answer boundary is genuinely fuzzy.
