@@ -67,6 +67,10 @@ def main() -> None:
         "hybrid": lambda q: hybrid_search(
             tbl, embedder, q["query"], top_k=K, blender_version=_version_filter(q)
         ),
+        "hybrid+symbol": lambda q: hybrid_search(
+            tbl, embedder, q["query"], top_k=K,
+            blender_version=_version_filter(q), symbol_boost=True,
+        ),
         "hybrid+rerank": lambda q: hybrid_search(
             tbl, embedder, q["query"], top_k=K,
             blender_version=_version_filter(q), reranker=reranker,
@@ -82,12 +86,13 @@ def main() -> None:
         results[name] = (overall, per_type, rows)
         print(f"{name:16}{overall['hit@k']:>8.3f}{overall['recall@k']:>10.3f}{overall['mrr']:>8.3f}")
 
-    overall, per_type, rows = results["hybrid+rerank"]
-    print("\nper-source (hybrid+rerank):")
+    focus = "hybrid+symbol"
+    overall, per_type, rows = results[focus]
+    print(f"\nper-source ({focus}):")
     for t, agg in sorted(per_type.items()):
         print(f"  {t:14} hit@k {agg['hit@k']:.3f}  mrr {agg['mrr']:.3f}  (n={int(agg['n'])})")
 
-    print("\nmisses (hybrid+rerank, hit@k=0) — check if expectation is wrong or retrieval failed:")
+    print(f"\nmisses ({focus}, hit@k=0) — check if expectation is wrong or retrieval failed:")
     misses = 0
     for (q, m) in rows:
         if m["hit"] == 0.0:

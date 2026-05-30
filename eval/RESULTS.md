@@ -9,8 +9,13 @@ queries, k=5). Metrics defined in `src/blender_rag/evaluate.py`. Index: full
 | config | hit@k | recall@k | MRR |
 |--------|------:|---------:|----:|
 | vector-only | 0.722 | 0.722 | 0.522 |
-| hybrid (dense + BM25) | **0.759** | **0.759** | **0.550** |
+| hybrid (dense + BM25) | 0.759 | 0.759 | 0.550 |
+| **hybrid + symbol boost** | **0.759** | **0.759** | **0.580** |
 | hybrid + rerank | 0.759 | 0.759 | 0.527 |
+
+The cheap **symbol-name boost beats the 600M cross-encoder** on MRR (0.580 vs
+0.527) and beats plain hybrid (0.550), at near-zero cost — a third RRF signal
+that rewards candidates whose leaf symbol name matches the query.
 
 Per-source (hybrid + rerank):
 

@@ -11,6 +11,7 @@ unit-testable without torch or lancedb.
 
 from __future__ import annotations
 
+import re
 from collections.abc import Iterable, Sequence
 from pathlib import Path
 from typing import Any
@@ -18,6 +19,8 @@ from typing import Any
 from blender_rag.embed import Embedder
 from blender_rag.rerank import Reranker
 from blender_rag.schema import Chunk
+
+_WORD = re.compile(r"[a-z0-9]+")
 
 DOCS_TABLE = "docs"
 CODE_TABLE = "code"
@@ -123,6 +126,35 @@ def open_table(db_path: str | Path, table_name: str = DOCS_TABLE) -> Any:
     return lancedb.connect(str(db_path)).open_table(table_name)
 
 
+def symbol_name_score(symbol: str, title: str, query_tokens: set[str]) -> float:
+    """Fraction of a symbol's leaf-name tokens present in the query.
+
+    For ``bpy.ops.object.select_all`` the leaf is ``select_all`` -> tokens
+    {select, all}; the query "select or deselect all objects" contains both, so
+    the score is 1.0. An exact leaf-name match is a strong API-lookup signal that
+    dense + BM25 alone can bury under sibling operators.
+    """
+    leaf = (symbol or title or "").split(".")[-1].replace("_", " ").lower()
+    toks = set(_WORD.findall(leaf))
+    if not toks:
+        return 0.0
+    return len(toks & query_tokens) / len(toks)
+
+
+def symbol_name_ranking(
+    rows: Sequence[dict[str, Any]], query: str
+) -> list[dict[str, Any]]:
+    """Rank candidate rows by leaf-symbol-name overlap with the query (desc)."""
+    qtok = set(_WORD.findall(query.lower()))
+    scored = [
+        (symbol_name_score(r.get("symbol", ""), r.get("title", ""), qtok), r)
+        for r in rows
+    ]
+    scored = [(s, r) for s, r in scored if s > 0]
+    scored.sort(key=lambda x: x[0], reverse=True)
+    return [r for _, r in scored]
+
+
 def hybrid_search(
     tbl: Any,
     embedder: Embedder,
@@ -133,12 +165,14 @@ def hybrid_search(
     blender_version: str | None = None,
     candidates: int = 40,
     reranker: Reranker | None = None,
+    symbol_boost: bool = False,
 ) -> list[dict[str, Any]]:
     """Vector + BM25 hybrid search fused with RRF, then optionally reranked.
 
     Without a ``reranker``, returns the top_k RRF-fused hits. With one, the
     fused candidate pool is rescored by the cross-encoder and the best top_k
-    returned (higher precision).
+    returned. ``symbol_boost`` adds a third RRF signal that rewards candidates
+    whose leaf symbol name matches the query (helps exact API/operator lookups).
     """
     where = build_where(source_type, blender_version)
 
@@ -156,7 +190,15 @@ def hybrid_search(
     except Exception:
         fhits = []  # FTS optional; vector results still valid
 
-    fused = reciprocal_rank_fusion([vhits, fhits])
+    lists = [vhits, fhits]
+    if symbol_boost:
+        # union of the candidate pool, ranked by leaf-symbol-name match
+        seen: dict[str, dict[str, Any]] = {}
+        for row in [*vhits, *fhits]:
+            seen.setdefault(row["id"], row)
+        lists.append(symbol_name_ranking(list(seen.values()), query))
+
+    fused = reciprocal_rank_fusion(lists)
     candidate_hits = [_to_hit(row, score) for row, score in fused[:candidates]]
 
     if reranker is not None:
