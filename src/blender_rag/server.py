@@ -47,7 +47,7 @@ def _resources() -> tuple[Embedder, Any, Reranker | None, bool]:
     device = cfg.section("embedding", "device", default="auto")
     embedder = Embedder(cfg.section("embedding", "prose_model"), device=device)
     table = open_table(index_path, DOCS_TABLE)
-    symbol_boost = bool(cfg.section("embedding", "symbol_boost", default=True))
+    symbol_boost = bool(cfg.section("embedding", "symbol_boost", default=False))
 
     # The eval (eval/RESULTS.md) shows the cross-encoder reranker hurts MRR while
     # the free symbol boost helps, so the reranker is off by default. Re-enable

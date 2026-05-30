@@ -13,9 +13,18 @@ queries, k=5). Metrics defined in `src/blender_rag/evaluate.py`. Index: full
 | **hybrid + symbol boost** | **0.759** | **0.759** | **0.580** |
 | hybrid + rerank | 0.759 | 0.759 | 0.527 |
 
-The cheap **symbol-name boost beats the 600M cross-encoder** on MRR (0.580 vs
-0.527) and beats plain hybrid (0.550), at near-zero cost — a third RRF signal
-that rewards candidates whose leaf symbol name matches the query.
+Read this carefully — the headline is "keep it simple". On hit@k the three
+hybrid variants are **identical** (0.759); the differences are MRR only and small.
+The symbol boost gives a tiny MRR edge (0.580) but, per-source, it *lowers* API
+hit@k (0.657 -> 0.629) by promoting sibling operators — it does **not** fix the
+gap it was built for. The reranker is the only clear signal: it consistently
+*hurts* MRR. A full-match-only variant of the boost was tried and was worse
+(hit@k 0.741, MRR 0.559).
+
+**Conclusion / default config:** plain **hybrid** (dense + BM25 + RRF), no
+reranker, no symbol boost. It ties the best hit@k, has the best API hit@k, and is
+the simplest. Both enhancements remain as opt-in config flags
+(`embedding.use_reranker`, `embedding.symbol_boost`) with this evidence attached.
 
 Per-source (hybrid + rerank):
 
