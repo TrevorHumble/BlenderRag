@@ -187,9 +187,40 @@ def split_python_symbols(source: str) -> list[tuple[str, str, int]]:
     return out
 
 
-def chunk_python(doc: Document) -> Iterator[Chunk]:
-    for idx, (name, code, line) in enumerate(split_python_symbols(doc.text)):
-        yield Chunk.from_document(doc, code, idx, extra={"symbol": name, "line": line})
+def window_code(code: str, max_chars: int) -> list[str]:
+    """Split code into <=``max_chars`` windows on line boundaries.
+
+    AST splitting yields one chunk per top-level symbol, but a single large
+    class/module can be huge (BlenderMCP's addon.py is one ~99k-char class).
+    Unbounded chunks get truncated by the embedder (losing most of the file)
+    and bloat embedding time, so cap them here.
+    """
+    if len(code) <= max_chars:
+        return [code]
+    parts: list[str] = []
+    cur = ""
+    for line in code.splitlines(keepends=True):
+        if cur and len(cur) + len(line) > max_chars:
+            parts.append(cur)
+            cur = ""
+        cur += line
+        while len(cur) > max_chars:  # a single oversized line
+            parts.append(cur[:max_chars])
+            cur = cur[max_chars:]
+    if cur.strip():
+        parts.append(cur)
+    return parts
+
+
+def chunk_python(doc: Document, *, max_chars: int) -> Iterator[Chunk]:
+    idx = 0
+    for name, code, line in split_python_symbols(doc.text):
+        windows = window_code(code, max_chars)
+        multi = len(windows) > 1
+        for part, text in enumerate(windows):
+            symbol = f"{name}#part{part}" if multi else name
+            yield Chunk.from_document(doc, text, idx, extra={"symbol": symbol, "line": line})
+            idx += 1
 
 
 def chunk_api(doc: Document, *, max_chars: int, overlap_chars: int) -> Iterator[Chunk]:
@@ -219,7 +250,8 @@ def chunk_document(doc: Document, cfg: Config | None = None) -> Iterator[Chunk]:
     overlap_chars = overlap_tokens * 4
 
     if doc.source_type in _CODE_TYPES:
-        yield from chunk_python(doc)
+        # code units are legitimately larger than prose; cap generously
+        yield from chunk_python(doc, max_chars=max_chars * 3)
     elif doc.source_type is SourceType.API:
         yield from chunk_api(doc, max_chars=max_chars, overlap_chars=overlap_chars)
     else:  # markdown/prose is the default

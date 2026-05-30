@@ -3,8 +3,27 @@ from blender_rag.chunk import (
     pack_section,
     split_markdown_sections,
     split_python_symbols,
+    window_code,
 )
 from blender_rag.schema import Document, SourceType
+
+
+def test_window_code_caps_oversized_and_is_lossless():
+    code = "\n".join(f"x_{i} = {i}" for i in range(2000))
+    parts = window_code(code, 500)
+    assert len(parts) > 1
+    assert all(len(p) <= 500 for p in parts)
+    assert "".join(parts) == code  # no content lost
+
+
+def test_chunk_python_splits_a_huge_symbol():
+    big = "def huge():\n" + "\n".join(f"    a{i} = {i}" for i in range(3000))
+    doc = Document.create(
+        text=big, source_type=SourceType.BLENDERMCP, source_url="u", title="big.py"
+    )
+    chunks = list(chunk_document(doc))
+    assert len(chunks) > 1
+    assert all(c.extra["symbol"].startswith("huge#part") for c in chunks)
 
 
 def test_split_markdown_sections_builds_breadcrumbs():
