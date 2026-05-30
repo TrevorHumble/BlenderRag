@@ -16,6 +16,7 @@ from pathlib import Path
 from typing import Any
 
 from blender_rag.embed import Embedder
+from blender_rag.rerank import Reranker
 from blender_rag.schema import Chunk
 
 DOCS_TABLE = "docs"
@@ -131,8 +132,14 @@ def hybrid_search(
     source_type: str | None = None,
     blender_version: str | None = None,
     candidates: int = 40,
+    reranker: Reranker | None = None,
 ) -> list[dict[str, Any]]:
-    """Vector + BM25 hybrid search fused with RRF. Returns ``top_k`` hits."""
+    """Vector + BM25 hybrid search fused with RRF, then optionally reranked.
+
+    Without a ``reranker``, returns the top_k RRF-fused hits. With one, the
+    fused candidate pool is rescored by the cross-encoder and the best top_k
+    returned (higher precision).
+    """
     where = build_where(source_type, blender_version)
 
     qvec = embedder.encode_one(query)
@@ -150,4 +157,8 @@ def hybrid_search(
         fhits = []  # FTS optional; vector results still valid
 
     fused = reciprocal_rank_fusion([vhits, fhits])
-    return [_to_hit(row, score) for row, score in fused[:top_k]]
+    candidate_hits = [_to_hit(row, score) for row, score in fused[:candidates]]
+
+    if reranker is not None:
+        return reranker.rerank(query, candidate_hits, top_k)
+    return candidate_hits[:top_k]

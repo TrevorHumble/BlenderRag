@@ -22,6 +22,7 @@ from mcp.server.fastmcp import FastMCP
 from blender_rag.config import load_config
 from blender_rag.embed import Embedder
 from blender_rag.index import DOCS_TABLE, hybrid_search, open_table
+from blender_rag.rerank import Reranker
 
 SourceType = Literal["manual", "api", "release_notes", "dev_docs", "code", "blendermcp"]
 
@@ -38,16 +39,19 @@ mcp = FastMCP(
 
 
 @lru_cache(maxsize=1)
-def _resources() -> tuple[Embedder, Any]:
-    """Load the embedder + LanceDB table once, lazily, on first query."""
+def _resources() -> tuple[Embedder, Any, Reranker | None]:
+    """Load the embedder, LanceDB table, and reranker once, lazily."""
     cfg = load_config()
     index_path = os.environ.get("INDEX_PATH") or str(cfg.path("index"))
-    embedder = Embedder(
-        cfg.section("embedding", "prose_model"),
-        device=cfg.section("embedding", "device", default="auto"),
-    )
+    device = cfg.section("embedding", "device", default="auto")
+    embedder = Embedder(cfg.section("embedding", "prose_model"), device=device)
     table = open_table(index_path, DOCS_TABLE)
-    return embedder, table
+
+    reranker = None
+    model = cfg.section("embedding", "reranker")
+    if model:
+        reranker = Reranker(model, device=device)
+    return embedder, table, reranker
 
 
 @mcp.tool()
@@ -73,7 +77,7 @@ def search_blender_docs(
             release_notes, dev_docs, code, blendermcp.
         blender_version: Restrict to a version string like "5.1" or "5.0".
     """
-    embedder, table = _resources()
+    embedder, table, reranker = _resources()
     return hybrid_search(
         table,
         embedder,
@@ -81,6 +85,7 @@ def search_blender_docs(
         top_k=top_k,
         source_type=source_type,
         blender_version=blender_version,
+        reranker=reranker,
     )
 
 
