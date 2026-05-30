@@ -102,12 +102,13 @@ something to search.
 Working end to end. A real MCP client handshake (`scripts/verify_mcp.py`) lists
 the tool and retrieves Blender 5.1 results.
 
-**Sources indexed:** release notes (5.0 + 5.1), the full bpy API reference
-(~23k per-symbol docs), and the manual (~2,200 RST pages).
+**Sources indexed:** the full bpy API reference (~23k per-symbol docs), the
+manual (~2,200 RST pages), release notes (5.0 + 5.1), the developer handbook,
+and the BlenderMCP addon source.
 **Retrieval:** hybrid (dense BGE-M3 + BM25) fused with RRF, then reranked by a
 bge-reranker-v2-m3 cross-encoder. Every chunk is tagged with its Blender version.
 
 Deferred (see [issues](https://github.com/TrevorHumble/BlenderRag/issues)):
-developer docs / add-on source (#4), contextual retrieval via Ollama (#8) — the
-one expensive ingestion step — and the higher-volume/ToS-flagged community
-sources (Stack Exchange, forums, YouTube).
+core add-on source — needs the full `blender/blender` clone (#4), contextual
+retrieval via Ollama (#8) — the one expensive ingestion step — and the
+higher-volume/ToS-flagged community sources (Stack Exchange, forums, YouTube).
