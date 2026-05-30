@@ -15,12 +15,12 @@
 {"query": "how do I extrude faces along their normals", "type": "manual", "expect": ["extrude_faces"]}
 {"query": "introduction to bezier and nurbs curves", "type": "manual", "expect": ["modeling/curves"]}
 {"query": "using the knife tool to cut a mesh", "type": "manual", "expect": ["knife"]}
-{"query": "loop cut and slide on a mesh", "type": "manual", "expect": ["loop_cut"]}
+{"query": "loop cut and slide on a mesh", "type": "manual", "expect": ["loopcut_slide"]}
 {"query": "subdivision surface modifier overview", "type": "manual", "expect": ["modifiers/generate/subdivision"]}
 {"query": "what changed in the python api in blender 5.1", "type": "release_notes", "expect": ["release_notes/5.1/python_api"], "filter": {"blender_version": "5.1"}}
 {"query": "sequencer strip time properties were renamed", "type": "release_notes", "expect": ["release_notes/5.1/sequencer"], "filter": {"blender_version": "5.1"}}
 {"query": "which python version ships with blender 5.1", "type": "release_notes", "expect": ["python_api"], "filter": {"blender_version": "5.1"}}
-{"query": "geometry nodes changes in blender 5.1", "type": "release_notes", "expect": ["geometry_nodes"], "filter": {"blender_version": "5.1"}}
+{"query": "geometry nodes changes in blender 5.1", "type": "release_notes", "expect": ["release_notes/5.1/geometry_nodes"], "filter": {"blender_version": "5.1"}}
 {"query": "grease pencil changes in blender 5.0", "type": "release_notes", "expect": ["release_notes/5.0"], "filter": {"blender_version": "5.0"}}
 {"query": "how to write a good bug report for blender", "type": "dev_docs", "expect": ["bug_reports"]}
 {"query": "guidelines for triaging incoming bug reports", "type": "dev_docs", "expect": ["bug_reports"]}
