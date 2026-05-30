@@ -40,19 +40,23 @@ mcp = FastMCP(
 
 
 @lru_cache(maxsize=1)
-def _resources() -> tuple[Embedder, Any, Reranker | None]:
-    """Load the embedder, LanceDB table, and reranker once, lazily."""
+def _resources() -> tuple[Embedder, Any, Reranker | None, bool]:
+    """Load the embedder, LanceDB table, reranker, and the symbol-boost flag."""
     cfg = load_config()
     index_path = os.environ.get("INDEX_PATH") or str(cfg.path("index"))
     device = cfg.section("embedding", "device", default="auto")
     embedder = Embedder(cfg.section("embedding", "prose_model"), device=device)
     table = open_table(index_path, DOCS_TABLE)
+    symbol_boost = bool(cfg.section("embedding", "symbol_boost", default=True))
 
+    # The eval (eval/RESULTS.md) shows the cross-encoder reranker hurts MRR while
+    # the free symbol boost helps, so the reranker is off by default. Re-enable
+    # with embedding.use_reranker: true.
     reranker = None
     model = cfg.section("embedding", "reranker")
-    if model:
+    if cfg.section("embedding", "use_reranker", default=False) and model:
         reranker = Reranker(model, device=device)
-    return embedder, table, reranker
+    return embedder, table, reranker, symbol_boost
 
 
 @mcp.tool()
@@ -78,7 +82,7 @@ def search_blender_docs(
             release_notes, dev_docs, code, blendermcp.
         blender_version: Restrict to a version string like "5.1" or "5.0".
     """
-    embedder, table, reranker = _resources()
+    embedder, table, reranker, symbol_boost = _resources()
     return hybrid_search(
         table,
         embedder,
@@ -87,6 +91,7 @@ def search_blender_docs(
         source_type=source_type,
         blender_version=blender_version,
         reranker=reranker,
+        symbol_boost=symbol_boost,
     )
 
 
