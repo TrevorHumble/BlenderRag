@@ -42,3 +42,5 @@ sources:
     repo: "https://projects.blender.org/blender/blender-developer-docs.git"
   blendermcp:
     repo: "https://github.com/ahujasid/blender-mcp.git"
+  gotchas:
+    dir: corpus/curated # in-repo curated 5.x behavioral notes (committed)

@@ -29,6 +29,7 @@ class SourceType(StrEnum):
     DEV_DOCS = "dev_docs"
     CODE = "code"
     BLENDERMCP = "blendermcp"
+    GOTCHAS = "gotchas"
 
 
 def stable_id(*parts: str) -> str:

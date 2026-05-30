@@ -50,6 +50,7 @@ Skip it for non-Blender questions, or when you've already confirmed the symbol t
 | the exact bpy operator/type/property signature | `"api"` |
 | how to do something / a UI workflow | `"manual"` |
 | what changed in a version | `"release_notes"` (+ `blender_version`) |
+| a 5.x behavioral gotcha / renamed identifier | `"gotchas"` |
 | real example code / idioms | `"code"` or `"blendermcp"` |
 
 Why it matters: for a general phrasing like *"create a subdivision surface modifier"*,
@@ -61,6 +62,29 @@ pass `source_type="manual"`.
 
 **Two-step pattern for scripting:** first `source_type="manual"` to learn the workflow,
 then `source_type="api"` to lock the exact call. Then write the code.
+
+## Operating recommendations (from real eval sessions)
+
+These cost the most when ignored — an eval session hit `NISHITA`-removed and
+`Glare.glare_type` errors whose answers were *in the corpus*, just queried too late:
+
+- **Query BEFORE you write the call, not after it throws.** The corpus knows the
+  5.x enum/signature; an exception you could have prevented wastes an iteration.
+- **Behavioral gotchas live in `source_type="gotchas"`** — keyframe-value inversion,
+  the compositor-as-node-group rewrite, NISHITA removal, etc. Per-symbol `api`
+  pages won't warn you about these; the `gotchas` source will.
+- **Menu/enum sockets take the display string, not `UPPER_SNAKE`** (e.g. Glare
+  Type `'Fog Glow'`, not `'FOG_GLOW'`). The corpus confirms the enum *exists*;
+  `dir()` / `node.inputs[...].default_value` probe at runtime confirms the exact
+  literal.
+- **Manual display names ≠ Python attrs** (manual says "Air"; Python is
+  `air_density`). Don't copy a manual hit's friendly label as an attribute.
+- **If `bpy.ops.X` is the only hit but you wanted `bpy.data.Y`**, the data-API
+  equivalent almost always exists — query the container class
+  (`bpy.types.Scene.collection`, `bpy.types.Collection.children`) or fall back to
+  memory; don't accept the operator as the only answer.
+- **Don't treat a per-attribute hit as exhaustive.** Need three fields on a class?
+  Query the class itself, then drill into individual attribute pages for defaults.
 
 ### Examples
 

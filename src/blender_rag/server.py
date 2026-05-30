@@ -25,7 +25,9 @@ from blender_rag.embed import Embedder
 from blender_rag.index import DOCS_TABLE, hybrid_search, open_table
 from blender_rag.rerank import Reranker
 
-SourceType = Literal["manual", "api", "release_notes", "dev_docs", "code", "blendermcp"]
+SourceType = Literal[
+    "manual", "api", "release_notes", "dev_docs", "code", "blendermcp", "gotchas"
+]
 
 mcp = FastMCP(
     "blender-docs",
