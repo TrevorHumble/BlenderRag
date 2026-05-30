@@ -1,0 +1,28 @@
+{"query": "add a cube mesh using a python operator", "type": "api", "expect": ["primitive_cube_add"]}
+{"query": "add a uv sphere in python", "type": "api", "expect": ["primitive_uv_sphere_add"]}
+{"query": "create a subdivision surface modifier", "type": "api", "expect": ["SubsurfModifier"]}
+{"query": "join selected mesh objects", "type": "api", "expect": ["object.join"]}
+{"query": "apply a modifier from python", "type": "api", "expect": ["modifier_apply"]}
+{"query": "set object shading to smooth", "type": "api", "expect": ["shade_smooth"]}
+{"query": "delete the selected objects", "type": "api", "expect": ["object.delete"]}
+{"query": "add a bezier curve object", "type": "api", "expect": ["primitive_bezier_curve_add"]}
+{"query": "select or deselect all objects", "type": "api", "expect": ["object.select_all"]}
+{"query": "add a camera to the scene", "type": "api", "expect": ["camera_add"]}
+{"query": "add a light object", "type": "api", "expect": ["light_add"]}
+{"query": "move or translate an object", "type": "api", "expect": ["transform.translate"]}
+{"query": "subdivide the mesh with the subdivision set operator", "type": "api", "expect": ["subdivision_set"]}
+{"query": "extrude a region of faces in edit mode", "type": "api", "expect": ["extrude_region"]}
+{"query": "how do I extrude faces along their normals", "type": "manual", "expect": ["extrude_faces"]}
+{"query": "introduction to bezier and nurbs curves", "type": "manual", "expect": ["modeling/curves"]}
+{"query": "using the knife tool to cut a mesh", "type": "manual", "expect": ["knife"]}
+{"query": "loop cut and slide on a mesh", "type": "manual", "expect": ["loop_cut"]}
+{"query": "subdivision surface modifier overview", "type": "manual", "expect": ["modifiers/generate/subdivision"]}
+{"query": "what changed in the python api in blender 5.1", "type": "release_notes", "expect": ["release_notes/5.1/python_api"], "filter": {"blender_version": "5.1"}}
+{"query": "sequencer strip time properties were renamed", "type": "release_notes", "expect": ["release_notes/5.1/sequencer"], "filter": {"blender_version": "5.1"}}
+{"query": "which python version ships with blender 5.1", "type": "release_notes", "expect": ["python_api"], "filter": {"blender_version": "5.1"}}
+{"query": "geometry nodes changes in blender 5.1", "type": "release_notes", "expect": ["geometry_nodes"], "filter": {"blender_version": "5.1"}}
+{"query": "grease pencil changes in blender 5.0", "type": "release_notes", "expect": ["release_notes/5.0"], "filter": {"blender_version": "5.0"}}
+{"query": "how to write a good bug report for blender", "type": "dev_docs", "expect": ["bug_reports"]}
+{"query": "guidelines for triaging incoming bug reports", "type": "dev_docs", "expect": ["bug_reports"]}
+{"query": "blendermcp blender addon source code", "type": "blendermcp", "expect": ["addon.py"]}
+{"query": "blendermcp mcp server implementation", "type": "blendermcp", "expect": ["server.py"]}
