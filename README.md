@@ -56,6 +56,9 @@ tests/             pytest (pure-logic, no torch)
 config.yaml        pipeline configuration
 ```
 
+See [ARCHITECTURE.md](ARCHITECTURE.md) for design decisions, the measured
+retrieval findings, and the non-obvious bugs the code guards against.
+
 ## Develop
 
 ```bash
