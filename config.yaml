@@ -1,0 +1,40 @@
+# Blender RAG configuration — single source of truth for the pipeline.
+blender_version: "5.1"
+
+paths:
+  raw: data/raw # cloned/downloaded sources
+  corpus: data/corpus.jsonl # normalized Documents
+  chunks: data/chunks.jsonl # chunked (+ contextualized) Chunks
+  index: index/lancedb # LanceDB tables
+
+embedding:
+  prose_model: BAAI/bge-m3 # dense+sparse, 1024-dim, prose/Q&A
+  code_model: nomic-ai/CodeRankEmbed # 768-dim, dedicated code index
+  reranker: BAAI/bge-reranker-v2-m3 # cross-encoder, query-time
+  device: auto # auto -> cuda if available, else cpu
+  batch_size: 32
+
+chunking:
+  max_tokens: 512
+  overlap_tokens: 64
+  min_chunk_chars: 64 # drop tiny fragments
+
+contextual:
+  enabled: true
+  ollama_model: qwen2.5:7b-instruct
+  # API symbols are already self-describing, so skip them to save time.
+  scope: [manual, release_notes, dev_docs, code, blendermcp]
+
+sources:
+  release_notes:
+    versions: ["5.0", "5.1"]
+    base_url: "https://developer.blender.org/docs/release_notes"
+  manual:
+    repo: "https://projects.blender.org/blender/blender-manual.git"
+    branch: "blender-v5.1-release"
+  bpy_api:
+    zip_url: "https://docs.blender.org/api/current/blender_python_reference_5_1.zip"
+  dev_docs:
+    repo: "https://projects.blender.org/blender/blender-developer-docs.git"
+  blendermcp:
+    repo: "https://github.com/ahujasid/blender-mcp.git"
