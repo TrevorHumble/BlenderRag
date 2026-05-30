@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 
+from blender_rag.acquire.bpy_api import acquire_bpy_api
 from blender_rag.acquire.release_notes import acquire_release_notes
 from blender_rag.config import Config, load_config
 from blender_rag.schema import Document
@@ -15,6 +16,7 @@ from blender_rag.schema import Document
 # name -> acquirer callable. Extend as sources come online.
 ACQUIRERS = {
     "release_notes": acquire_release_notes,
+    "bpy_api": acquire_bpy_api,
 }
 
 
@@ -25,4 +27,4 @@ def acquire_all(cfg: Config | None = None) -> Iterator[Document]:
         yield from fn(cfg)
 
 
-__all__ = ["ACQUIRERS", "acquire_all", "acquire_release_notes"]
+__all__ = ["ACQUIRERS", "acquire_all", "acquire_bpy_api", "acquire_release_notes"]
