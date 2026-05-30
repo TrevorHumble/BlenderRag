@@ -12,6 +12,7 @@ Run: ``uv run python src/blender_rag/server.py``  (needs the ``ml`` dep group)
 # mcp first and torch (via sentence-transformers) second segfaults with an
 # access violation. Verified by process-level bisection. Do not reorder.
 import os
+import sys
 from functools import lru_cache
 from typing import Any, Literal
 
@@ -90,6 +91,14 @@ def search_blender_docs(
 
 
 def main() -> None:
+    # Preload models in the MAIN thread before the event loop starts. FastMCP
+    # runs sync tools in an anyio worker thread; loading heavy native models
+    # (torch/sentence-transformers) off the main thread can deadlock, so we warm
+    # the cache here while we still own the main thread. The handler then only
+    # runs inference on already-loaded models.
+    print("blender-docs: loading models + index ...", file=sys.stderr, flush=True)
+    _resources()
+    print("blender-docs: ready", file=sys.stderr, flush=True)
     mcp.run()  # stdio transport by default
 
 
