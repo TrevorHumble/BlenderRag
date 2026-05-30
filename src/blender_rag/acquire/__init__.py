@@ -8,7 +8,9 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 
+from blender_rag.acquire.blendermcp import acquire_blendermcp
 from blender_rag.acquire.bpy_api import acquire_bpy_api
+from blender_rag.acquire.dev_docs import acquire_dev_docs
 from blender_rag.acquire.manual import acquire_manual
 from blender_rag.acquire.release_notes import acquire_release_notes
 from blender_rag.config import Config, load_config
@@ -19,6 +21,8 @@ ACQUIRERS = {
     "release_notes": acquire_release_notes,
     "bpy_api": acquire_bpy_api,
     "manual": acquire_manual,
+    "dev_docs": acquire_dev_docs,
+    "blendermcp": acquire_blendermcp,
 }
 
 
@@ -32,7 +36,9 @@ def acquire_all(cfg: Config | None = None) -> Iterator[Document]:
 __all__ = [
     "ACQUIRERS",
     "acquire_all",
+    "acquire_blendermcp",
     "acquire_bpy_api",
+    "acquire_dev_docs",
     "acquire_manual",
     "acquire_release_notes",
 ]
