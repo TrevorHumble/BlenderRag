@@ -1,5 +1,30 @@
-from blender_rag.index import build_where, chunk_to_record, reciprocal_rank_fusion
+from blender_rag.index import (
+    build_where,
+    chunk_to_record,
+    reciprocal_rank_fusion,
+    symbol_name_ranking,
+    symbol_name_score,
+)
 from blender_rag.schema import Chunk, Document, SourceType
+
+
+def test_symbol_name_score():
+    q = set("select or deselect all objects".split())
+    assert symbol_name_score("bpy.ops.object.select_all", "", q) == 1.0
+    partial = symbol_name_score(
+        "bpy.ops.wm.save_mainfile", "", set("save the blend file".split())
+    )
+    assert 0.0 < partial < 1.0
+    assert symbol_name_score("", "", q) == 0.0
+
+
+def test_symbol_name_ranking_orders_full_match_first():
+    rows = [
+        {"id": "1", "symbol": "bpy.ops.object.select_linked", "title": ""},
+        {"id": "2", "symbol": "bpy.ops.object.select_all", "title": ""},
+    ]
+    ranked = symbol_name_ranking(rows, "select all objects")
+    assert ranked[0]["id"] == "2"  # full leaf match outranks partial
 
 
 def test_build_where():
