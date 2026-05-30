@@ -34,7 +34,8 @@ mcp = FastMCP(
         "(Python/bpy API, operators, geometry/shader nodes, the manual, and "
         "release notes). Search here BEFORE writing or running Blender Python "
         "to confirm API signatures, operator/node names, and version-specific "
-        "behavior, instead of relying on older 4.x knowledge."
+        "behavior, instead of relying on older 4.x knowledge. For an exact bpy "
+        "symbol, pass source_type='api'; for how-to questions, source_type='manual'."
     ),
 )
 
@@ -79,8 +80,12 @@ def search_blender_docs(
             sequencer in 5.1").
         top_k: Number of chunks to return (default 6).
         source_type: Restrict to one corpus segment — one of manual, api,
-            release_notes, dev_docs, code, blendermcp.
-        blender_version: Restrict to a version string like "5.1" or "5.0".
+            release_notes, dev_docs, code, blendermcp. TIP: to confirm a specific
+            bpy operator/type/property signature, set ``source_type="api"`` — it
+            surfaces the exact symbol even when conceptual manual pages would
+            otherwise out-rank it. Use ``manual`` for how-to/UI questions.
+        blender_version: Restrict to a version string like "5.1" or "5.0". Set it
+            when behavior may have changed across versions.
     """
     embedder, table, reranker, symbol_boost = _resources()
     return hybrid_search(
