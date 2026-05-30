@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "blender-docs": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "${CLAUDE_PROJECT_DIR}",
+        "run",
+        "python",
+        "src/blender_rag/server.py"
+      ],
+      "env": {
+        "INDEX_PATH": "${CLAUDE_PROJECT_DIR}/index/lancedb"
+      },
+      "timeout": 120000
+    }
+  }
+}

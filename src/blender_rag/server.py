@@ -1,0 +1,92 @@
+"""FastMCP server exposing the Blender 5.1 knowledge base to Claude Code.
+
+Registers a single ``search_blender_docs`` tool. The embedding model and the
+LanceDB table are loaded once on first use and reused for every query (a stdio
+MCP server is a long-lived process).
+
+Run: ``uv run python src/blender_rag/server.py``  (needs the ``ml`` dep group)
+"""
+
+# ruff: noqa: I001 — import order is load-bearing here. torch's native runtime
+# must initialize BEFORE `mcp` is imported: on Windows (Python 3.14) importing
+# mcp first and torch (via sentence-transformers) second segfaults with an
+# access violation. Verified by process-level bisection. Do not reorder.
+import os
+from functools import lru_cache
+from typing import Any, Literal
+
+import torch  # noqa: F401 — eager: force torch to load before mcp (see note)
+
+from mcp.server.fastmcp import FastMCP
+
+from blender_rag.config import load_config
+from blender_rag.embed import Embedder
+from blender_rag.index import DOCS_TABLE, hybrid_search, open_table
+
+SourceType = Literal["manual", "api", "release_notes", "dev_docs", "code", "blendermcp"]
+
+mcp = FastMCP(
+    "blender-docs",
+    instructions=(
+        "Local semantic search over a curated Blender 5.1 knowledge corpus "
+        "(Python/bpy API, operators, geometry/shader nodes, the manual, and "
+        "release notes). Search here BEFORE writing or running Blender Python "
+        "to confirm API signatures, operator/node names, and version-specific "
+        "behavior, instead of relying on older 4.x knowledge."
+    ),
+)
+
+
+@lru_cache(maxsize=1)
+def _resources() -> tuple[Embedder, Any]:
+    """Load the embedder + LanceDB table once, lazily, on first query."""
+    cfg = load_config()
+    index_path = os.environ.get("INDEX_PATH") or str(cfg.path("index"))
+    embedder = Embedder(
+        cfg.section("embedding", "prose_model"),
+        device=cfg.section("embedding", "device", default="auto"),
+    )
+    table = open_table(index_path, DOCS_TABLE)
+    return embedder, table
+
+
+@mcp.tool()
+def search_blender_docs(
+    query: str,
+    top_k: int = 6,
+    source_type: SourceType | None = None,
+    blender_version: str | None = None,
+) -> list[dict[str, Any]]:
+    """Semantically search the local Blender 5.1 documentation corpus.
+
+    Use this whenever you need to verify a Blender Python (bpy) API signature, an
+    operator or node name, a node socket, or version-specific behavior, before
+    writing or running Blender code. Returns the most relevant documentation
+    chunks with their source URL, type, Blender version, and a relevance score.
+
+    Args:
+        query: Natural-language description of what you need (e.g. "add a
+            subdivision surface modifier in Python", "what changed in the
+            sequencer in 5.1").
+        top_k: Number of chunks to return (default 6).
+        source_type: Restrict to one corpus segment — one of manual, api,
+            release_notes, dev_docs, code, blendermcp.
+        blender_version: Restrict to a version string like "5.1" or "5.0".
+    """
+    embedder, table = _resources()
+    return hybrid_search(
+        table,
+        embedder,
+        query,
+        top_k=top_k,
+        source_type=source_type,
+        blender_version=blender_version,
+    )
+
+
+def main() -> None:
+    mcp.run()  # stdio transport by default
+
+
+if __name__ == "__main__":
+    main()
