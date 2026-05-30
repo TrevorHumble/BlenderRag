@@ -105,11 +105,13 @@ the tool and retrieves Blender 5.1 results.
 **Sources indexed (32,279 chunks):** the full bpy API reference (~23k per-symbol
 docs), the manual (~2,200 RST pages), release notes (5.0 + 5.1), the developer
 handbook, and the BlenderMCP addon source.
-**Retrieval:** hybrid (dense BGE-M3 + BM25) fused with RRF, then reranked by a
-bge-reranker-v2-m3 cross-encoder. Every chunk is tagged with its Blender version.
-**Measured quality** (`eval/RESULTS.md`, 28 labeled queries): hybrid hit@k
-**0.857**; manual / release notes / dev docs / BlenderMCP all 1.000; API 0.714.
-The reranker shows no reliable gain yet on this small set (see #27).
+**Retrieval:** hybrid (dense BGE-M3 + BM25) fused with RRF, plus a free
+leaf-symbol-name boost. A bge-reranker-v2-m3 cross-encoder is wired up but
+**off by default** — the eval shows it hurts ranking. Every chunk is tagged with
+its Blender version.
+**Measured quality** (`eval/RESULTS.md`, 54 labeled queries): hit@k **0.759**,
+MRR **0.580** (hybrid + symbol boost — the best config, beating the reranker's
+0.527). manual / dev docs / BlenderMCP at 1.000; API 0.657 is the weak spot (#27).
 
 Deferred (see [issues](https://github.com/TrevorHumble/BlenderRag/issues)):
 core add-on source — needs the full `blender/blender` clone (#4), contextual

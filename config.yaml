@@ -10,7 +10,9 @@ paths:
 embedding:
   prose_model: BAAI/bge-m3 # dense+sparse, 1024-dim, prose/Q&A
   code_model: nomic-ai/CodeRankEmbed # 768-dim, dedicated code index
-  reranker: BAAI/bge-reranker-v2-m3 # cross-encoder, query-time
+  reranker: BAAI/bge-reranker-v2-m3 # cross-encoder model (only used if use_reranker)
+  use_reranker: false # eval shows it hurts MRR (eval/RESULTS.md, #27); flip to re-enable
+  symbol_boost: true # leaf-symbol-name RRF signal; +0.03 MRR, free
   device: auto # auto -> cuda if available, else cpu
   batch_size: 32
 
