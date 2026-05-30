@@ -65,6 +65,27 @@ uv run ruff check .           # lint
 uv sync --group ml            # add torch + embedding stack (GPU build)
 ```
 
+## Connect to Claude Code
+
+The repo ships a project-scoped `.mcp.json`. Open the project in Claude Code and
+approve the `blender-docs` server when prompted. It exposes one tool:
+
+```
+search_blender_docs(query, top_k=6, source_type=None, blender_version=None)
+  -> ranked doc chunks with source_url, source_type, title, blender_version, score
+```
+
+To make it available in **every** session (not just this project), register it at
+user scope:
+
+```powershell
+claude mcp add --scope user blender-docs -- `
+  uv --directory C:\Users\thumb\BlenderRag run python src/blender_rag/server.py
+```
+
+Build the index first (`uv run python scripts/build_corpus.py`, then `build_chunks.py`,
+then `build_index.py`) so the server has something to search.
+
 ## Status
 
 Under active construction. See the [issues](https://github.com/TrevorHumble/BlenderRag/issues)
