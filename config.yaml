@@ -24,7 +24,7 @@ chunking:
   min_chunk_chars: 64 # drop tiny fragments
 
 contextual:
-  enabled: false # NOT yet implemented — see issue #8 (Ollama contextual retrieval)
+  enabled: false # implemented (build_context.py); off until the full run is done (hours for 32k) (#8)
   ollama_model: qwen2.5:7b-instruct
   # API symbols are already self-describing, so skip them to save time.
   scope: [manual, release_notes, dev_docs, code, blendermcp]
