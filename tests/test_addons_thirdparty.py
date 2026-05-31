@@ -1,5 +1,6 @@
 from blender_rag.acquire.addons_thirdparty import (
     documents_from_addon,
+    find_manifest,
     is_current_manifest,
 )
 from blender_rag.schema import SourceType
@@ -29,4 +30,27 @@ def test_documents_from_addon_emits_creative_code_docs(tmp_path):
     assert d.extra["tier"] == "creative"
     assert d.extra["license"] == "gpl-3.0"
     assert d.extra["addon"] == "MyAddon"
+    assert d.extra["version_status"] == "current"
     assert d.title == "MyAddon/ops/__init__.py"
+
+
+def test_find_manifest_in_subdir(tmp_path):
+    # manifest in a package subdir (the case that wrongly skipped MolecularNodes)
+    pkg = tmp_path / "molecularnodes"
+    pkg.mkdir()
+    (pkg / "blender_manifest.toml").write_text('blender_version_min = "5.1.0"')
+    found = find_manifest(tmp_path)
+    assert found is not None
+    assert found.parent.name == "molecularnodes"
+
+
+def test_find_manifest_prefers_shallowest(tmp_path):
+    (tmp_path / "blender_manifest.toml").write_text('blender_version_min = "5.0.0"')
+    deep = tmp_path / "sub"
+    deep.mkdir()
+    (deep / "blender_manifest.toml").write_text('blender_version_min = "4.2.0"')
+    assert find_manifest(tmp_path).parent == tmp_path  # root wins
+
+
+def test_find_manifest_absent(tmp_path):
+    assert find_manifest(tmp_path) is None

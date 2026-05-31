@@ -61,8 +61,20 @@ def is_current_manifest(toml_text: str, *, floor: tuple[int, int] = (4, 2)) -> b
     return len(parts) >= 2 and parts >= floor
 
 
+def find_manifest(root: str | Path) -> Path | None:
+    """Locate ``blender_manifest.toml`` at the repo root OR in a package subdir.
+
+    Many add-ons ship the manifest inside their package folder, not at the repo
+    root, so a root-only check wrongly skips current add-ons (e.g. MolecularNodes,
+    min 5.1). Prefer the shallowest match.
+    """
+    root = Path(root)
+    matches = sorted(root.rglob("blender_manifest.toml"), key=lambda p: len(p.parts))
+    return matches[0] if matches else None
+
+
 def documents_from_addon(
-    root: str | Path, *, name: str, license_id: str
+    root: str | Path, *, name: str, license_id: str, version_status: str = "current"
 ) -> Iterator[Document]:
     """Yield one CODE Document per ``.py`` file in an add-on repo (pure)."""
     root = Path(root)
@@ -76,7 +88,13 @@ def documents_from_addon(
             source_type=SourceType.CODE,
             source_url=f"{WEB_BASE}/{name}/{rel}",
             title=f"{name}/{rel}",
-            extra={"tier": "creative", "addon": name, "license": license_id, "path": rel},
+            extra={
+                "tier": "creative",
+                "addon": name,
+                "license": license_id,
+                "version_status": version_status,
+                "path": rel,
+            },
         )
 
 
@@ -91,10 +109,10 @@ def acquire_addons_thirdparty(cfg: Config | None = None) -> Iterator[Document]:
     for name, url, license_id in VETTED:
         dest = dest_root / name
         ensure_repo(url, dest)
-        manifest = dest / "blender_manifest.toml"
-        # fake-bpy-module is a type-stub mirror (MIT), not an extension — always take it.
+        # MIT mirrors (fake-bpy-module, pynodes) aren't extensions — always take.
         if license_id != "mit":
-            if not manifest.is_file() or not is_current_manifest(
+            manifest = find_manifest(dest)
+            if manifest is None or not is_current_manifest(
                 manifest.read_text(encoding="utf-8", errors="ignore")
             ):
                 continue
