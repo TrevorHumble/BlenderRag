@@ -41,5 +41,28 @@ def test_symbol_metadata_and_url():
     foo = next(d for d in docs if d.title == "bpy.ops.mesh.foo")
     assert foo.extra["kind"] == "function"
     assert foo.source_url == "https://docs.blender.org/api/current/bpy.ops.mesh.html#bpy.ops.mesh.foo"
-    bar = next(d for d in docs if d.title == "bpy.types.Bar")
+    bar = next(d for d in docs if d.title == "bpy.types.Bar" and d.extra["kind"] == "class")
     assert bar.extra["kind"] == "class"
+
+
+def test_class_summary_lists_members_not_siblings():
+    docs = documents_from_html(SAMPLE_HTML, "bpy.types.Bar.html")
+    summary = next(d for d in docs if d.extra.get("kind") == "class_summary")
+    assert summary.title == "bpy.types.Bar"
+    assert "baz" in summary.text  # member listed
+    assert "foo" not in summary.text  # sibling top-level function NOT listed
+    # distinct id / url from the per-symbol class doc, so they don't collide
+    assert summary.source_url.endswith("#bpy.types.Bar-summary")
+    per_symbol = next(
+        d for d in docs if d.title == "bpy.types.Bar" and d.extra["kind"] == "class"
+    )
+    assert summary.id != per_symbol.id
+
+
+def test_class_summary_does_not_drop_per_symbol_docs():
+    docs = documents_from_html(SAMPLE_HTML, "bpy.types.Bar.html")
+    kinds = {(d.title, d.extra.get("kind")) for d in docs}
+    assert ("bpy.ops.mesh.foo", "function") in kinds
+    assert ("bpy.types.Bar", "class") in kinds
+    assert ("bpy.types.Bar.baz", "method") in kinds
+    assert ("bpy.types.Bar", "class_summary") in kinds

@@ -59,7 +59,40 @@ def documents_from_html(html: str, filename: str) -> list[Document]:
                 extra={"symbol": name, "kind": _symbol_kind(dl)},
             )
         )
+
+        if _symbol_kind(dl) == "class":
+            summary = _class_summary(dl, name, signature, filename)
+            if summary is not None:
+                docs.append(summary)
     return docs
+
+
+def _class_summary(dl, name: str, signature: str, filename: str) -> Document | None:
+    """One extra Document listing the class signature + each member's signature.
+
+    A query naming several attributes of one class retrieves the whole class in
+    one hit, instead of fragmenting across per-attribute chunks. The id is kept
+    distinct from the per-symbol class doc via a ``#{name}-summary`` anchor (the
+    per-symbol doc uses ``#{name}``), so they don't collide and overwrite.
+    """
+    members: list[str] = []
+    seen: set[str] = set()
+    for member_dt in dl.select("dl.py > dt[id]"):
+        sig = member_dt.get_text(" ", strip=True).replace("¶", "").strip()
+        if sig and sig not in seen:
+            seen.add(sig)
+            members.append(sig)
+    if not members:
+        return None
+
+    body = signature + "\n\nMembers:\n" + "\n".join(f"- {m}" for m in members)
+    return Document.create(
+        text=body,
+        source_type=SourceType.API,
+        source_url=f"{API_BASE}/{filename}#{name}-summary",
+        title=name,
+        extra={"symbol": name, "kind": "class_summary"},
+    )
 
 
 def _ensure_extracted(cfg: Config) -> Path:

@@ -34,6 +34,7 @@ _HIT_FIELDS = (
     "blender_version",
     "section",
     "symbol",
+    "kind",
 )
 
 
@@ -48,6 +49,7 @@ def chunk_to_record(chunk: Chunk, vector: list[float]) -> dict[str, Any]:
         "blender_version": chunk.blender_version,
         "section": str(chunk.extra.get("section", "")),
         "symbol": str(chunk.extra.get("symbol", "")),
+        "kind": str(chunk.extra.get("kind", "")),
         "text": chunk.text,
         "embed_text": chunk.embed_text,
         "vector": vector,
