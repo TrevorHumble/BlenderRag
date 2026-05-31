@@ -58,6 +58,14 @@ the conceptual manual page out-ranks the API type. If you need the symbol
 (`bpy.types.SubsurfModifier`), pass `source_type="api"`; if you need the how-to,
 pass `source_type="manual"`.
 
+**For API-symbol lookups, set `source_type="api"` AND `top_k=8` (measured: #41).**
+This is the single biggest retrieval lever. On the eval set, routing API queries to
+`source_type="api"` lifts API hit@k 0.657 → 0.771 at k=5, and to 0.829 at k=8
+(overall 0.759 → 0.889). The target operator is often present but ranked 6–8, buried
+under lexically-similar siblings (`object.select_all` under many `*_select_all`;
+`object.parent_set` under other `parent_*`), so the wider window matters. Don't stop
+at the default `top_k=6` when hunting an exact operator.
+
 **Set `blender_version="5.1"`** when behavior may be version-specific, to avoid 5.0/4.x noise.
 
 **Two-step pattern for scripting:** first `source_type="manual"` to learn the workflow,
@@ -85,6 +93,13 @@ These cost the most when ignored — an eval session hit `NISHITA`-removed and
   memory; don't accept the operator as the only answer.
 - **Don't treat a per-attribute hit as exhaustive.** Need three fields on a class?
   Query the class itself, then drill into individual attribute pages for defaults.
+- **Mind operator vocabulary mismatch (known #41 limitation).** Some operators are
+  named differently from how you'd phrase the task: *scale* an object is
+  `transform.resize`; *save* is `wm.save_mainfile`; *render a frame* is
+  `render.render`. Natural-language queries can miss these even with
+  `source_type="api"`. If a sensible query returns nothing, try the *operator's own
+  vocabulary* (search `"resize"` not `"scale"`) or the `bpy.ops.<category>` group
+  page to browse siblings.
 
 ### Examples
 
