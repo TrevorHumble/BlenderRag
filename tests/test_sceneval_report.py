@@ -34,6 +34,15 @@ def test_report_shows_rag_improvement_verdicts():
     assert "RAG effect:" in md
 
 
+def test_report_has_cross_task_summary_and_verdict():
+    md = render_report(_results(), backend_label="fake")
+    assert "## Summary" in md
+    assert "RAG helped on" in md
+    assert "| task | Δ error_rate" in md
+    # the rigged demo helps -> a tick in the summary
+    assert "✅" in md
+
+
 def test_single_condition_renders_no_delta():
     metrics = [score(demo_session("solo", rag_enabled=True, run_index=0))]
     md = render_report(ablation(metrics), backend_label="fake")

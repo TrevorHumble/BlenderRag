@@ -70,3 +70,18 @@ def test_count_matches_detect_length():
 @pytest.mark.parametrize("snippet", ["", "   ", "x = 1"])
 def test_no_false_positives_on_trivial(snippet):
     assert count_gotchas(snippet) == 0
+
+
+def test_comment_only_footgun_not_counted():
+    assert count_gotchas("# remember: NISHITA was removed in 5.0") == 0
+    assert count_gotchas("engine = 'BLENDER_EEVEE'  # not BLENDER_EEVEE_NEXT") == 0
+
+
+def test_string_footgun_still_counted_after_comment_strip():
+    # the enum value lives in a string -> must still be detected
+    assert "nishita_sky_removed" in _ids("node.sky_type = 'NISHITA'  # set sky")
+
+
+def test_code_before_comment_preserved():
+    code = "scene.render.engine = 'BLENDER_EEVEE_NEXT'  # TODO fix"
+    assert "eevee_next_engine_id" in _ids(code)
