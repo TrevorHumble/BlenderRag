@@ -28,6 +28,9 @@ ml = [
     "mcp>=1.2",
     "ollama>=0.3",
 ]
+# Scene-eval (Layer A) live backend: the Claude agent driver. The in-process RAG
+# searcher and the live Blender (MCP) executor are already covered by `ml`.
+eval = ["anthropic>=0.40"]
 
 # torch comes from the CUDA 12.8 wheel index (Blackwell / RTX 50-series).
 [[tool.uv.index]]
