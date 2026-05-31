@@ -21,7 +21,10 @@ from blender_rag.sceneval.demo import demo_session
 from blender_rag.sceneval.gotchas import count_gotchas
 from blender_rag.sceneval.metrics import score
 from blender_rag.sceneval.report import render_report
+from blender_rag.sceneval.runner import run_session
 from blender_rag.sceneval.schema import SessionLog
+
+_RESET_CODE = "import bpy\nbpy.ops.wm.read_homefile(use_empty=True)"
 
 
 def load_tasks(path: Path) -> list[dict]:
@@ -29,15 +32,46 @@ def load_tasks(path: Path) -> list[dict]:
     return [json.loads(line) for line in lines if line.strip()]
 
 
-def make_session(backend: str, task_id: str, *, rag_enabled: bool, run_index: int) -> SessionLog:
-    if backend == "fake":
-        return demo_session(task_id, rag_enabled=rag_enabled, run_index=run_index)
-    if backend == "live":
-        raise SystemExit(
-            "live backend not available yet (needs ANTHROPIC_API_KEY + a running "
-            "blender MCP server). Use --backend fake for the plumbing demo."
-        )
-    raise SystemExit(f"unknown backend: {backend!r}")
+def run_fake(tasks: list[dict], n: int) -> list[SessionLog]:
+    logs: list[SessionLog] = []
+    for task in tasks:
+        for rag_enabled in (True, False):
+            for run_index in range(n):
+                logs.append(
+                    demo_session(task["id"], rag_enabled=rag_enabled, run_index=run_index)
+                )
+    return logs
+
+
+def run_live(tasks: list[dict], n: int, *, model: str, max_iter: int) -> list[SessionLog]:
+    # Heavy + optional deps imported only on the live path.
+    from blender_rag.sceneval.backends import (
+        AnthropicSceneAgent,
+        InProcessRagSearcher,
+        McpBlenderExecutor,
+    )
+
+    searcher = InProcessRagSearcher()  # the real RAG, loaded once
+    executor = McpBlenderExecutor()  # one persistent live-Blender session
+    logs: list[SessionLog] = []
+    for task in tasks:
+        for rag_enabled in (True, False):
+            for run_index in range(n):
+                executor.execute(_RESET_CODE)  # fresh scene per session (not logged)
+                agent = AnthropicSceneAgent(task["prompt"], model=model)
+                logs.append(
+                    run_session(
+                        task_id=task["id"],
+                        agent=agent,
+                        executor=executor,
+                        searcher=searcher if rag_enabled else None,
+                        rag_enabled=rag_enabled,
+                        run_index=run_index,
+                        model=model,
+                        max_iterations=max_iter,
+                    )
+                )
+    return logs
 
 
 def main() -> None:
@@ -45,21 +79,18 @@ def main() -> None:
     ap.add_argument("--tasks", type=Path, default=REPO_ROOT / "eval" / "scenes" / "tasks.jsonl")
     ap.add_argument("--n", type=int, default=3, help="runs per condition per task")
     ap.add_argument("--backend", choices=["fake", "live"], default="fake")
+    ap.add_argument("--model", default="claude-sonnet-4-5", help="live backend model")
+    ap.add_argument("--max-iter", type=int, default=40, help="max agent steps per session")
     ap.add_argument("--out", type=Path, default=REPO_ROOT / "eval" / "SCENEVAL.md")
     ap.add_argument("--logs", type=Path, default=None, help="optional dir for raw session logs")
     args = ap.parse_args()
 
     tasks = load_tasks(args.tasks)
-    all_metrics = []
-    logs: list[SessionLog] = []
-    for task in tasks:
-        for rag_enabled in (True, False):
-            for run_index in range(args.n):
-                log = make_session(
-                    args.backend, task["id"], rag_enabled=rag_enabled, run_index=run_index
-                )
-                logs.append(log)
-                all_metrics.append(score(log, gotcha_counter=count_gotchas))
+    if args.backend == "live":
+        logs = run_live(tasks, args.n, model=args.model, max_iter=args.max_iter)
+    else:
+        logs = run_fake(tasks, args.n)
+    all_metrics = [score(lg, gotcha_counter=count_gotchas) for lg in logs]
 
     results = ablation(all_metrics)
     report = render_report(

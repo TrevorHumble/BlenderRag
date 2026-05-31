@@ -59,6 +59,17 @@ class BlenderExecutor(Protocol):
     def snapshot(self) -> SceneSnapshot: ...
 
 
+def _trim_hit(hit: dict[str, Any], *, max_text: int = 600) -> dict[str, Any]:
+    """Keep just what an agent needs to relay a hit (and to keep logs small)."""
+    text = str(hit.get("text", ""))[:max_text]
+    return {
+        "title": hit.get("title"),
+        "source_url": hit.get("source_url"),
+        "source_type": hit.get("source_type"),
+        "text": text,
+    }
+
+
 def run_session(
     *,
     task_id: str,
@@ -86,18 +97,18 @@ def run_session(
             completed = True
             break
         if action.kind == "query":
-            n_hits = 0
+            hits: list[dict[str, Any]] = []
             if rag_enabled and searcher is not None:
                 hits = searcher.search(
                     action.query, top_k=action.top_k, source_type=action.source_type
                 )
-                n_hits = len(hits)
             events.append(
                 RagQueryEvent(
                     query=action.query,
                     source_type=action.source_type,
                     top_k=action.top_k,
-                    n_hits=n_hits,
+                    n_hits=len(hits),
+                    hits=[_trim_hit(h) for h in hits],
                 )
             )
         elif action.kind == "exec":
