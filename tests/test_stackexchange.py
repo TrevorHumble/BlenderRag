@@ -1,4 +1,7 @@
-from blender_rag.acquire.stackexchange import documents_from_dump_xml
+from blender_rag.acquire.stackexchange import (
+    documents_from_dump_xml,
+    iter_documents_from_posts_file,
+)
 from blender_rag.schema import SourceType
 
 # Posts.xml fixture: 1 question + 4 answers (high/low score, recent/old).
@@ -60,3 +63,15 @@ def test_old_answer_excluded_by_floor_even_if_high_score():
     # answer 4 is score 20 but 2015 -> below the 2019 floor -> dropped
     docs = documents_from_dump_xml(SAMPLE, min_score=3, since_year=2019)
     assert "https://blender.stackexchange.com/a/4" not in _by_url(docs)
+
+
+def test_streaming_file_parser_matches_in_memory(tmp_path):
+    posts = tmp_path / "Posts.xml"
+    posts.write_text(SAMPLE, encoding="utf-8")
+    streamed = list(iter_documents_from_posts_file(posts, min_score=3, since_year=2019))
+    in_mem = documents_from_dump_xml(SAMPLE, min_score=3, since_year=2019)
+    assert {d.source_url for d in streamed} == {d.source_url for d in in_mem}
+    # provenance survives the streaming path
+    a2 = next(d for d in streamed if d.source_url.endswith("/a/2"))
+    assert a2.extra["tier"] == "creative"
+    assert "How to add a subdivision surface modifier?" in a2.text
