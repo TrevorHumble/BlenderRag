@@ -59,24 +59,27 @@ def run_live(tasks: list[dict], n: int, *, model: str, max_iter: int) -> list[Se
     searcher = InProcessRagSearcher()  # the real RAG, loaded once
     executor = McpBlenderExecutor()  # one persistent live-Blender session
     logs: list[SessionLog] = []
-    for task in tasks:
-        for rag_enabled in (True, False):
-            for run_index in range(n):
-                executor.execute(_RESET_CODE)  # fresh scene per session (not logged)
-                agent = AnthropicSceneAgent(task["prompt"], model=model)
-                logs.append(
-                    run_session(
-                        task_id=task["id"],
-                        agent=agent,
-                        executor=executor,
-                        searcher=searcher if rag_enabled else None,
-                        rag_enabled=rag_enabled,
-                        run_index=run_index,
-                        model=model,
-                        max_iterations=max_iter,
-                        success_hints=task.get("success_hints", []),
+    try:
+        for task in tasks:
+            for rag_enabled in (True, False):
+                for run_index in range(n):
+                    executor.execute(_RESET_CODE)  # fresh scene per session (not logged)
+                    agent = AnthropicSceneAgent(task["prompt"], model=model)
+                    logs.append(
+                        run_session(
+                            task_id=task["id"],
+                            agent=agent,
+                            executor=executor,
+                            searcher=searcher if rag_enabled else None,
+                            rag_enabled=rag_enabled,
+                            run_index=run_index,
+                            model=model,
+                            max_iterations=max_iter,
+                            success_hints=task.get("success_hints", []),
+                        )
                     )
-                )
+    finally:
+        executor.close()  # tear down the MCP session / loop [review #2]
     return logs
 
 

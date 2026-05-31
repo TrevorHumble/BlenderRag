@@ -46,6 +46,16 @@ def test_new_effect_missing_length_flagged_but_with_length_ok():
     )
 
 
+def test_new_effect_nested_parens_not_false_flagged():
+    # length= sits after a nested call -> must NOT be mis-flagged as missing [review #4]
+    code = "strips.new_effect(type='CROSS', frame_end=end_of(s), length=10)"
+    assert "new_effect_missing_length" not in _ids(code)
+    # genuinely missing length, even with a nested call, is still flagged
+    assert "new_effect_missing_length" in _ids(
+        "strips.new_effect(type='CROSS', frame_end=end_of(s))"
+    )
+
+
 def test_clean_code_has_no_hits():
     code = "import bpy\nbpy.ops.mesh.primitive_cube_add()\nob = bpy.context.object\n"
     assert detect_gotchas(code) == []
