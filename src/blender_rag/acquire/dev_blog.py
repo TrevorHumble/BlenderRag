@@ -114,13 +114,20 @@ def iter_wp_archive(
             timeout=60,
             headers={"User-Agent": "Mozilla/5.0"},
         )
+        # WP returns 400 'rest_post_invalid_page_number' past the last page — a
+        # clean end. A non-200 on page 1, though, is a real failure: raise rather
+        # than silently yielding a truncated archive.
         if resp.status_code != 200:
+            if page == 1:
+                resp.raise_for_status()
             break
         posts = resp.json()
         if not posts:
             break
         yield from documents_from_wp_posts(posts)
-        if page >= int(resp.headers.get("X-WP-TotalPages", page)):
+        # Terminal signal: a short page is the last one. Don't trust X-WP-TotalPages
+        # alone (proxies sometimes strip it, which would truncate to page 1).
+        if len(posts) < per_page:
             break
 
 

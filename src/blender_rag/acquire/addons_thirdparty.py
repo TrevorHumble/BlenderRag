@@ -58,7 +58,11 @@ def is_current_manifest(toml_text: str, *, floor: tuple[int, int] = (4, 2)) -> b
         parts = tuple(int(x) for x in raw.split(".")[:2])
     except ValueError:
         return False
-    return len(parts) >= 2 and parts >= floor
+    if not parts:
+        return False
+    if len(parts) == 1:  # "5" -> (5, 0), so a major-only manifest isn't dropped
+        parts = (parts[0], 0)
+    return parts >= floor
 
 
 def find_manifest(root: str | Path) -> Path | None:
@@ -69,16 +73,43 @@ def find_manifest(root: str | Path) -> Path | None:
     min 5.1). Prefer the shallowest match.
     """
     root = Path(root)
-    matches = sorted(root.rglob("blender_manifest.toml"), key=lambda p: len(p.parts))
+    matches = sorted(root.rglob("blender_manifest.toml"), key=lambda p: (len(p.parts), str(p)))
     return matches[0] if matches else None
 
 
+# Non-bpy noise to skip: tests, packaging, vendored deps, caches.
+_SKIP_PARTS = {"tests", "test", "__pycache__", ".git", "vendor", "vendored", "lib", "libs"}
+_SKIP_FILES = {"setup.py", "conftest.py"}
+
+
+def _web_base(repo_url: str | None, name: str) -> str:
+    """GitHub blob base from the clone URL (owner/repo), else a name fallback."""
+    if repo_url:
+        return f"{repo_url.removesuffix('.git')}/blob/HEAD"
+    return f"{WEB_BASE}/{name}"
+
+
 def documents_from_addon(
-    root: str | Path, *, name: str, license_id: str, version_status: str = "current"
+    root: str | Path,
+    *,
+    name: str,
+    license_id: str,
+    version_status: str = "current",
+    repo_url: str | None = None,
 ) -> Iterator[Document]:
-    """Yield one CODE Document per ``.py`` file in an add-on repo (pure)."""
+    """Yield one CODE Document per idiomatic ``.py`` in an add-on repo (pure).
+
+    Skips tests / packaging / vendored / cache files so the corpus stays
+    idiomatic-bpy, not build scaffolding.
+    """
     root = Path(root)
+    web = _web_base(repo_url, name)
     for py in sorted(root.rglob("*.py")):
+        rel_parts = py.relative_to(root).parts
+        if py.name in _SKIP_FILES or py.name.startswith("test_"):
+            continue
+        if _SKIP_PARTS.intersection(rel_parts):
+            continue
         text = py.read_text(encoding="utf-8", errors="ignore")
         if not text.strip():
             continue
@@ -86,7 +117,7 @@ def documents_from_addon(
         yield Document.create(
             text=text,
             source_type=SourceType.CODE,
-            source_url=f"{WEB_BASE}/{name}/{rel}",
+            source_url=f"{web}/{rel}",
             title=f"{name}/{rel}",
             extra={
                 "tier": "creative",
@@ -116,4 +147,6 @@ def acquire_addons_thirdparty(cfg: Config | None = None) -> Iterator[Document]:
                 manifest.read_text(encoding="utf-8", errors="ignore")
             ):
                 continue
-        yield from documents_from_addon(dest, name=name, license_id=license_id)
+        yield from documents_from_addon(
+            dest, name=name, license_id=license_id, repo_url=url
+        )

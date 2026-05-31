@@ -55,6 +55,10 @@ Do not begin until you have:
 3. **RAG connection.** Confirm `mcp__blender-docs__search_blender_docs` answers. If
    not, use the **`blender-docs`** skill (in this repo) / **`blender-rag`** skill
    to start or register the server and build the index.
+4. **Read the log shape now** (so the eval isn't fumbled mid-run): skim
+   `src/blender_rag/sceneval/schema.py` so you know the `SessionLog` /
+   `RagQueryEvent` / `CodeExecEvent` fields you'll record (skeleton also inlined
+   below).
 
 Then **check the time and write down your start time and target end time.** Say
 them out loud so the contract is explicit. Now begin.
@@ -95,7 +99,8 @@ a screenshot. It will name the single biggest problem; fix that, then keep going
 
 Every iteration:
 
-- **Check the time** occasionally (every few iterations). Track elapsed vs target.
+- **Check the time** occasionally mid-run, and **always** when you feel done.
+  Track elapsed vs target.
 - **Before any bpy call you're not 100% sure is 5.x-correct, search the RAG first**
   (`search_blender_docs`, `source_type="api"` + `top_k=8` for exact symbols,
   `"manual"` for how-to, `"gotchas"` for known 5.x footguns). Confirm, then write.
@@ -113,9 +118,23 @@ compositor pass). Repeat until the duration is truly spent.
 You are the live test of the RAG. Keep a running session log and grade it.
 
 **Record, as you go**, an event list in the `sceneval` `SessionLog` shape
-(`src/blender_rag/sceneval/schema.py`):
-- each **RAG query** (query, source_type, n_hits, whether the hits were useful),
-- each **code execution** (the code, ok/failed, error type if any).
+(`src/blender_rag/sceneval/schema.py`). Minimal JSON skeleton so you don't have to
+guess the fields:
+
+```json
+{
+  "task_id": "your-scene-name", "rag_enabled": true, "model": "...",
+  "success_hints": ["BLENDER_EEVEE", "AgX"],
+  "events": [
+    {"type": "rag_query", "query": "...", "source_type": "api", "top_k": 8, "n_hits": 6},
+    {"type": "code_exec", "code": "...", "ok": true, "error_type": null, "error_message": null}
+  ],
+  "final_scene": {"objects": 0, "meshes": 0, "materials": 0, "material_nodes": 0, "lights": 0},
+  "completed": true
+}
+```
+- append a **rag_query** event for each search (note whether the hits were useful),
+- append a **code_exec** event for each `execute_blender_code` (ok/failed + error type).
 
 At the end, write the log to `eval/sessions/<timestamp>.json` and:
 - run `uv run python scripts/show_session.py <file>` for the transcript + the

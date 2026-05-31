@@ -93,9 +93,8 @@ def node_tree_to_graph(node_tree: Any, *, kind: str = "node") -> dict[str, Any]:
                 inputs[sock.name] = tuple(val) if is_seq else val
             except (TypeError, ValueError):
                 continue
-        nodes.append(
-            {"name": node.name, "type": getattr(node, "bl_idname", node.type), "inputs": inputs}
-        )
+        ntype = getattr(node, "bl_idname", None) or getattr(node, "type", "?")
+        nodes.append({"name": node.name, "type": ntype, "inputs": inputs})
     links = [
         {
             "from_node": lk.from_node.name,
