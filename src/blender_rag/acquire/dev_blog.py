@@ -10,9 +10,10 @@ ingestion are gated (#49/#72). Tagged technical-tier (official dev content) with
 CC-BY-SA license stamp for the commercial-clean filter. Pure ``documents_from_rss``
 is unit-tested with a fixture; live-validated against the feed (10 current posts).
 
-NOTE: the RSS feed carries only the latest ~10 posts. For the full ~12-year
-archive, page the WordPress REST API (``/wp-json/wp/v2/posts?per_page=100&page=N``)
-or the sitemap — a follow-up; the RSS path proves the parser + gives current posts.
+Two fetch paths: ``iter_wp_archive`` pages the **full** WordPress REST API archive
+(~248 posts) — the default — and ``documents_from_rss`` parses the latest-~10 feed
+(``mode: rss``). Both pure parsers (``documents_from_wp_posts`` / ``documents_from_rss``)
+are fixture-tested; the fetchers are live.
 """
 
 from __future__ import annotations
@@ -27,6 +28,7 @@ from blender_rag.config import Config, load_config
 from blender_rag.schema import Document, SourceType
 
 FEED_URL = "https://code.blender.org/feed/"
+WP_API = "https://code.blender.org/wp-json/wp/v2/posts"
 _CONTENT_NS = "{http://purl.org/rss/1.0/modules/content/}encoded"
 
 
@@ -69,10 +71,68 @@ def documents_from_rss(rss_xml: str) -> list[Document]:
     return docs
 
 
+def _document_from_wp_post(post: dict) -> Document | None:
+    """Build a Document from one WordPress REST API post object (pure)."""
+    title = (post.get("title", {}).get("rendered") or "").strip()
+    raw_html = post.get("content", {}).get("rendered") or ""
+    body = BeautifulSoup(raw_html, "lxml").get_text("\n", strip=True)
+    if not (title and body):
+        return None
+    date = (post.get("date") or "")[:10]  # ISO 'YYYY-MM-DD...'
+    year = int(date[:4]) if date[:4].isdigit() else 0
+    return Document.create(
+        text=f"{title}\n\n{body}",
+        source_type=SourceType.DEV_BLOG,
+        source_url=post.get("link") or WP_API,
+        title=title,
+        extra={
+            "tier": "technical",
+            "version_status": "current" if year >= 2024 else "dated_valid",
+            "source_date": date,
+            "license": "cc-by-sa-4.0",
+        },
+    )
+
+
+def documents_from_wp_posts(posts: list[dict]) -> list[Document]:
+    """Parse a page of WordPress REST API post objects into Documents (pure)."""
+    docs = (_document_from_wp_post(p) for p in posts)
+    return [d for d in docs if d is not None]
+
+
+def iter_wp_archive(
+    base_url: str = WP_API, *, per_page: int = 100, max_pages: int = 50
+) -> Iterator[Document]:
+    """Page the full WordPress archive (the RSS feed is only the latest ~10).
+
+    Stops at the reported ``X-WP-TotalPages`` (or an empty page). Live network.
+    """
+    for page in range(1, max_pages + 1):
+        resp = requests.get(
+            base_url,
+            params={"per_page": per_page, "page": page, "_fields": "title,link,date,content"},
+            timeout=60,
+            headers={"User-Agent": "Mozilla/5.0"},
+        )
+        if resp.status_code != 200:
+            break
+        posts = resp.json()
+        if not posts:
+            break
+        yield from documents_from_wp_posts(posts)
+        if page >= int(resp.headers.get("X-WP-TotalPages", page)):
+            break
+
+
 def acquire_dev_blog(cfg: Config | None = None) -> Iterator[Document]:
-    """Fetch + parse the dev-blog RSS feed. Unregistered (gated, #49/#72)."""
+    """Fetch the dev blog. Defaults to the FULL archive via the WP REST API;
+    set ``sources.dev_blog.mode: rss`` for the latest-only feed. Gated (#49/#72)."""
     cfg = cfg or load_config()
-    url = cfg.section("sources", "dev_blog", "feed_url", default=FEED_URL)
-    resp = requests.get(url, timeout=60, headers={"User-Agent": "Mozilla/5.0"})
-    resp.raise_for_status()
-    yield from documents_from_rss(resp.text)
+    mode = cfg.section("sources", "dev_blog", "mode", default="archive")
+    if mode == "rss":
+        url = cfg.section("sources", "dev_blog", "feed_url", default=FEED_URL)
+        resp = requests.get(url, timeout=60, headers={"User-Agent": "Mozilla/5.0"})
+        resp.raise_for_status()
+        yield from documents_from_rss(resp.text)
+    else:
+        yield from iter_wp_archive(cfg.section("sources", "dev_blog", "api_url", default=WP_API))

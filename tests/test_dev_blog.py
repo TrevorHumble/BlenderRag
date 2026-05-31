@@ -1,4 +1,4 @@
-from blender_rag.acquire.dev_blog import documents_from_rss
+from blender_rag.acquire.dev_blog import documents_from_rss, documents_from_wp_posts
 from blender_rag.schema import SourceType
 
 RSS = """<?xml version="1.0" encoding="UTF-8"?>
@@ -42,3 +42,30 @@ def test_version_status_from_pubdate_and_license():
 def test_skips_items_missing_title_or_body():
     rss = RSS.replace("Old post", "").replace("&lt;p&gt;A 2020 note.&lt;/p&gt;", "")
     assert len(documents_from_rss(rss)) == 1
+
+
+WP_POSTS = [
+    {
+        "title": {"rendered": "Volume Grids in Geometry Nodes"},
+        "link": "https://code.blender.org/2025/10/volume-grids/",
+        "date": "2025-10-07T09:00:00",
+        "content": {"rendered": "<p>New <b>volume</b> grids.</p>"},
+    },
+    {  # missing body -> skipped
+        "title": {"rendered": "Empty"},
+        "link": "https://code.blender.org/x/",
+        "date": "2026-01-01T00:00:00",
+        "content": {"rendered": ""},
+    },
+]
+
+
+def test_wp_posts_parse_and_skip_empty():
+    docs = documents_from_wp_posts(WP_POSTS)
+    assert len(docs) == 1
+    d = docs[0]
+    assert d.source_type is SourceType.DEV_BLOG
+    assert d.title == "Volume Grids in Geometry Nodes"
+    assert "volume" in d.text and "<p>" not in d.text
+    assert d.extra["source_date"] == "2025-10-07"
+    assert d.extra["version_status"] == "current"
