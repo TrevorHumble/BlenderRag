@@ -91,6 +91,10 @@ def main() -> None:
     ap.add_argument("--model", default="claude-sonnet-4-5", help="live backend model")
     ap.add_argument("--max-iter", type=int, default=40, help="max agent steps per session")
     ap.add_argument("--out", type=Path, default=REPO_ROOT / "eval" / "SCENEVAL.md")
+    ap.add_argument(
+        "--json", type=Path, default=None,
+        help="optional path for machine-readable AblationResult JSON (regression tracking)",
+    )
     ap.add_argument("--logs", type=Path, default=None, help="optional dir for raw session logs")
     args = ap.parse_args()
 
@@ -110,6 +114,12 @@ def main() -> None:
     args.out.parent.mkdir(parents=True, exist_ok=True)
     args.out.write_text(report, encoding="utf-8")
     print(f"wrote {args.out}  ({len(all_metrics)} sessions over {len(tasks)} tasks)")
+
+    if args.json:
+        payload = [r.model_dump() for r in results]
+        args.json.parent.mkdir(parents=True, exist_ok=True)
+        args.json.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        print(f"wrote machine-readable results -> {args.json}")
 
     if args.logs:
         args.logs.mkdir(parents=True, exist_ok=True)
