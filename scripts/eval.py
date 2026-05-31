@@ -22,7 +22,7 @@ from blender_rag.rerank import Reranker
 K = 5
 _HIT_FIELDS = (
     "id", "text", "source_type", "source_url",
-    "title", "section", "symbol", "blender_version",
+    "title", "section", "symbol", "kind", "blender_version",
 )
 
 
