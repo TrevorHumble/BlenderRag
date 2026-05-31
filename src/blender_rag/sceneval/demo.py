@@ -19,11 +19,20 @@ _FOOTGUN_A = "scene.render.engine = 'BLENDER_EEVEE_NEXT'"
 _FOOTGUN_B = "node.sky_type = 'NISHITA'"
 
 
-def demo_session(task_id: str, *, rag_enabled: bool, run_index: int = 0) -> SessionLog:
+def demo_session(
+    task_id: str,
+    *,
+    rag_enabled: bool,
+    run_index: int = 0,
+    success_hints: list[str] | None = None,
+) -> SessionLog:
+    hints = success_hints or []
     if rag_enabled:
+        # RAG-on "realizes" the brief: its clean code mentions the hint concepts.
+        realized = _CLEAN + "\n# " + " ".join(hints)
         actions = [
             AgentAction(kind="query", query=f"{task_id} engine setup", source_type="api"),
-            AgentAction(kind="exec", code=_CLEAN),
+            AgentAction(kind="exec", code=realized),
             AgentAction(kind="query", query=f"{task_id} materials", source_type="manual"),
             AgentAction(kind="exec", code="# clean material setup"),
         ]
@@ -33,6 +42,7 @@ def demo_session(task_id: str, *, rag_enabled: bool, run_index: int = 0) -> Sess
         return run_session(
             task_id=task_id, agent=ScriptedAgent(actions), executor=executor,
             searcher=FakeSearcher(3), rag_enabled=True, run_index=run_index, model="fake",
+            success_hints=hints,
         )
 
     # RAG-off: reaches for 4.x footguns; an extra failure on odd runs (variation).
@@ -51,4 +61,5 @@ def demo_session(task_id: str, *, rag_enabled: bool, run_index: int = 0) -> Sess
     return run_session(
         task_id=task_id, agent=ScriptedAgent(actions), executor=executor,
         searcher=None, rag_enabled=False, run_index=run_index, model="fake",
+        success_hints=hints,
     )

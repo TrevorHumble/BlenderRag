@@ -38,7 +38,12 @@ def run_fake(tasks: list[dict], n: int) -> list[SessionLog]:
         for rag_enabled in (True, False):
             for run_index in range(n):
                 logs.append(
-                    demo_session(task["id"], rag_enabled=rag_enabled, run_index=run_index)
+                    demo_session(
+                        task["id"],
+                        rag_enabled=rag_enabled,
+                        run_index=run_index,
+                        success_hints=task.get("success_hints", []),
+                    )
                 )
     return logs
 
@@ -69,6 +74,7 @@ def run_live(tasks: list[dict], n: int, *, model: str, max_iter: int) -> list[Se
                         run_index=run_index,
                         model=model,
                         max_iterations=max_iter,
+                        success_hints=task.get("success_hints", []),
                     )
                 )
     return logs

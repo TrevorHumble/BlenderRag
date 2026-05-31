@@ -78,6 +78,9 @@ class SessionLog(BaseModel):
     events: list[SessionEvent] = Field(default_factory=list)
     final_scene: SceneSnapshot | None = None
     completed: bool = False
+    # Concepts the brief asked for (e.g. ["BLENDER_EEVEE", "AgX"]); used to score
+    # whether the executed code actually realized the task (see task_signal_rate).
+    success_hints: list[str] = Field(default_factory=list)
     # Optional free-form notes (e.g. why the session stopped).
     note: str = ""
 
@@ -96,5 +99,6 @@ class SessionMetrics(BaseModel):
     rag_queries: int = 0
     query_before_call_rate: float = 0.0  # execs preceded by a query this step
     gotcha_hits: int = 0  # known 5.x footguns in executed code
+    task_signal_rate: float = 0.0  # fraction of brief concepts realized in code
     scene_total: int = 0  # SceneSnapshot.total (0 if no snapshot)
     completed: bool = False
