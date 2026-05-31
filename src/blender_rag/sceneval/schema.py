@@ -11,7 +11,7 @@ through JSON losslessly (sessions are persisted for later re-scoring).
 
 from __future__ import annotations
 
-from typing import Annotated, Literal
+from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, Field
 
@@ -28,6 +28,9 @@ class RagQueryEvent(BaseModel):
     source_type: str | None = None
     top_k: int = 6
     n_hits: int = 0
+    # Trimmed retrieved hits (title/url/snippet), so a live agent can relay the
+    # actual docs back to the model. Metrics ignore this; it is log/agent context.
+    hits: list[dict[str, Any]] = Field(default_factory=list)
 
 
 class CodeExecEvent(BaseModel):
