@@ -187,6 +187,10 @@ class AnthropicSceneAgent:
             max_tokens=self._max_tokens,
             system=_SYSTEM,
             tools=_tool_specs(),
+            # One action per step: forbid parallel tool calls so the assistant
+            # turn never carries >1 tool_use block (which would need >1
+            # tool_result and otherwise 400s on the next call). [review #1]
+            tool_choice={"type": "auto", "disable_parallel_tool_use": True},
             messages=self._messages,
         )
         block = _first_tool_use(reply)
@@ -224,18 +228,29 @@ def _guess_error_type(text: str) -> str:
 
 
 def _parse_snapshot(text: str) -> SceneSnapshot:
-    """Best-effort scene census from get_scene_info JSON (graceful on mismatch)."""
+    """Best-effort scene census from get_scene_info JSON (graceful on mismatch).
+
+    NOTE [review #3]: BlenderMCP's get_scene_info caps the returned object list
+    (~10) and key names vary across addon versions, so ``meshes``/``lights`` are
+    floor estimates and ``material_nodes`` isn't reported. ``object_count`` /
+    ``materials_count`` (when present) are authoritative; counts derived from the
+    capped object list under-report busy scenes. ``scene_total`` is a proxy, not
+    a census.
+    """
     import json
 
     try:
         data = json.loads(text)
     except (ValueError, TypeError):
         return SceneSnapshot()
-    objects = data.get("objects", []) if isinstance(data, dict) else []
-    n_obj = data.get("object_count", len(objects)) if isinstance(data, dict) else 0
+    if not isinstance(data, dict):
+        return SceneSnapshot()
+    objects = data.get("objects", []) or []
+    n_obj = data.get("object_count", len(objects))
     meshes = sum(1 for o in objects if isinstance(o, dict) and o.get("type") == "MESH")
     lights = sum(1 for o in objects if isinstance(o, dict) and o.get("type") == "LIGHT")
-    mats = data.get("material_count", 0) if isinstance(data, dict) else 0
+    # accept both spellings seen across addon versions
+    mats = data.get("materials_count", data.get("material_count", 0))
     return SceneSnapshot(objects=n_obj, meshes=meshes, materials=mats, lights=lights)
 
 
@@ -301,3 +316,27 @@ class McpBlenderExecutor:
             return _parse_snapshot(_mcp_result_text(self._call("get_scene_info", {})))
         except Exception:  # noqa: BLE001 — snapshot is best-effort telemetry
             return SceneSnapshot()
+
+    def close(self) -> None:
+        """Tear down the MCP session and stop the background loop. [review #2]"""
+        import asyncio
+
+        async def _teardown() -> None:
+            if getattr(self, "_session_cm", None) is not None:
+                await self._session_cm.__aexit__(None, None, None)
+            if getattr(self, "_client_cm", None) is not None:
+                await self._client_cm.__aexit__(None, None, None)
+
+        try:
+            asyncio.run_coroutine_threadsafe(_teardown(), self._loop).result(timeout=30)
+        except Exception:  # noqa: BLE001 — best-effort cleanup
+            pass
+        finally:
+            self._loop.call_soon_threadsafe(self._loop.stop)
+            self._thread.join(timeout=5)
+
+    def __enter__(self) -> McpBlenderExecutor:
+        return self
+
+    def __exit__(self, *exc: object) -> None:
+        self.close()

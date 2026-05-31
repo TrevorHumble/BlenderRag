@@ -45,8 +45,13 @@ def _agx_casing_finder(code: str) -> list[str]:
 
 
 def _new_effect_missing_length_finder(code: str) -> list[str]:
-    """VSE ``strips.new_effect(...)`` requires the 5.x ``length=`` keyword."""
-    rx = re.compile(r"new_effect\s*\([^)]*\)")
+    """VSE ``strips.new_effect(...)`` requires the 5.x ``length=`` keyword.
+
+    The arg pattern balances one level of nested parens so a call like
+    ``new_effect(type='X', frame_end=foo(1), length=10)`` isn't truncated at the
+    first ``)`` and mis-flagged as missing length. [review #4]
+    """
+    rx = re.compile(r"new_effect\s*\((?:[^()]|\([^()]*\))*\)")
     return [m.group(0) for m in rx.finditer(code) if "length=" not in m.group(0)]
 
 
