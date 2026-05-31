@@ -71,6 +71,15 @@ leak between runs.
   (the executor talks to `execute_blender_code` / `get_scene_info`).
 - A built index (`scripts/build_all.py`) for the in-process searcher.
 
+## Live marathon (human-driven L3)
+
+For a *live* end-to-end run — an agent builds a real scene for a user-set duration
+while using and grading the RAG — use the **`blender-marathon-rag`** skill
+(`.claude/skills/`). It produces a finished Blender piece + a RAG report from the
+session telemetry (single-session, no ablation; this `run_scene_eval.py` path is the
+controlled-ablation complement). A RAG-free variant for evaluating other setups
+lives as the global **`blender-marathon`** skill.
+
 ## Status / next (Layer B)
 
 - Render-quality judging via the `art-critic` skill (a vision rubric on the final
