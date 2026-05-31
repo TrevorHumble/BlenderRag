@@ -16,9 +16,11 @@ uv run python scripts/run_scene_eval.py --n 3 --backend fake
 uv run python scripts/run_scene_eval.py --n 5 --backend live --model claude-sonnet-4-5
 ```
 
-Writes a markdown report to `eval/SCENEVAL.md` (per-task table of RAG-off vs RAG-on
-means + on−off delta, with a ✅/⚠️ verdict per metric). `--logs DIR` dumps every
-raw `SessionLog` as JSON for re-scoring.
+Writes a markdown report to `eval/SCENEVAL.md` (a cross-task summary verdict, then
+per-task tables of RAG-off vs RAG-on means + on−off delta with a ✅/⚠️ verdict, plus
+a pooled-error-rate / spread / low-n honesty footer). `--logs DIR` dumps every raw
+`SessionLog` as JSON for re-scoring; `--json PATH` writes the machine-readable
+`AblationResult` aggregate for regression tracking across corpus/config changes.
 
 ## Metrics (pure, deterministic — `sceneval/metrics.py`)
 
