@@ -1,12 +1,63 @@
 # Retrieval eval results
 
-Run with `uv run python scripts/eval.py` over `eval/queries.jsonl` (54 labeled
+Run with `uv run python scripts/eval.py` over `eval/queries.jsonl` (62 labeled
 queries, k=5). Metrics defined in `src/blender_rag/evaluate.py`.
 
-## Latest run — 2026-05-31, 37,354 chunks (core add-ons added)
+## Latest run — 2026-05-31, 62-query set (#27 eval expansion)
 
-Index: full 6 sources, now including the core add-on source (#4, `source_type=code`,
-298 files → 2,984 chunks). 37,354 rows (was 34,370). Regression check for #4.
+Same 37,354-chunk index; the **eval set** grew 54 → 62. Added 2 `code` queries
+(core add-ons), 2 multi-attribute modifier queries (exercise class-summary), 2
+data-API queries (`bpy.data` operator-bias cases), and 2 more API/node queries. All
+8 expects pre-validated present in the corpus.
+
+| config | hit@k | recall@k | MRR |
+|--------|------:|---------:|----:|
+| vector-only | 0.758 | 0.758 | 0.526 |
+| **hybrid (dense + BM25)** | **0.758** | **0.758** | **0.512** |
+| hybrid + symbol boost | 0.710 | 0.710 | 0.553 |
+| hybrid + rerank | 0.758 | 0.758 | 0.502 |
+
+**#27.1 — reranker verdict reconfirmed on the bigger set.** hybrid+rerank ties plain
+hybrid on hit@k (0.758) and is *lower* on MRR (0.502 vs 0.512). On the harder,
+more-varied 62-query set the cross-encoder still earns nothing for its ~600M-param
+per-query cost. **Decision: stays opt-in/off** (`embedding.use_reranker: false`).
+symbol_boost again *lowers* hit@k (0.710). Both opt-in flags remain off by default.
+
+Aggregate hit@k is a touch below the 54-set's 0.778 because the 8 new queries are
+deliberately **routing-dependent**: this ablation passes no `source_type`, so the
+data-API / node / second code query miss. With the skill's routing
+(`source_type=api`/`code`, `top_k=8`) each was validated to return at rank 1–5 —
+see #41. The index did not change.
+
+**#27.3 — answer-type boundary (product call for Trevor, not auto-changed).** For
+general phrasings ("create a subdivision surface modifier") the manual page rightly
+out-ranks the API type; `source_type="api"` recovers the symbol. Options: (a) keep
+the deliberate-routing design as-is — the data says routing is highly effective
+(api hit@k 0.657→0.829 at k=8, #41) and the skill now instructs it; (b) add an
+"auto" default that detects symbol-shaped queries (`bpy.`, CamelCase, dotted paths)
+and blends a couple of `api` hits into an unrouted query. Recommendation: **(a)** —
+mixing risks diluting prose results, and routing already wins when followed. (b) is
+a future enhancement if telemetry shows callers not routing. Surfaced for decision;
+default unchanged.
+
+Per-source (hybrid + symbol boost, this run):
+
+| source | hit@k | MRR | n |
+|--------|------:|----:|--:|
+| manual | 1.000 | 1.000 | 7 |
+| dev_docs | 1.000 | 1.000 | 3 |
+| release_notes | 1.000 | 0.857 | 7 |
+| blendermcp | 1.000 | 0.625 | 2 |
+| code | 0.500 | 0.100 | 2 |
+| api | 0.585 | 0.411 | 41 |
+
+`code` shows 0.500 only because this ablation doesn't route; with `source_type="code"`
+both code queries return their target at rank 1.
+
+## Prior run — 54-query set, 37,354 chunks (core add-ons landed, #4)
+
+Index: full 6 sources incl. the core add-on source (#4, `source_type=code`,
+298 files → 2,984 chunks), 37,354 rows.
 
 | config | hit@k | recall@k | MRR |
 |--------|------:|---------:|----:|
@@ -20,8 +71,8 @@ query (`mesh.bevel`) flipped miss → hit. The likely mechanism is a BM25 IDF sh
 adding 2,984 code chunks changes global term statistics, and "bevel" appearing in
 add-on source reweights the lexical half enough to lift the `bpy.ops.mesh.bevel`
 API page into top-5. It's +1 query — modest, not a structural fix — but the
-direction is right and there is no regression on any source. (No `code`-type eval
-queries exist yet, so the *new* source's own retrieval is unmeasured — see #27.)
+direction is right and there is no regression on any source. (At the time this run
+had no `code`-type eval queries; #27 since added two — see the latest run above.)
 
 Symbol boost recovered to hit@k 0.759 with its best-ever MRR (0.607), but still
 trails default hybrid on hit@k and stays opt-in. Rerank unchanged (neutral hit,
