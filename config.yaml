@@ -42,5 +42,11 @@ sources:
     repo: "https://projects.blender.org/blender/blender-developer-docs.git"
   blendermcp:
     repo: "https://github.com/ahujasid/blender-mcp.git"
+  addons_core:
+    # Bundled core add-ons in the main repo: idiomatic, version-exact bpy.
+    # Huge repo -> blobless sparse clone of just the subdir (see ensure_repo).
+    repo: "https://projects.blender.org/blender/blender.git"
+    branch: "blender-v5.1-release"
+    subdir: "scripts/addons_core"
   gotchas:
     dir: corpus/curated # in-repo curated 5.x behavioral notes (committed)
