@@ -50,3 +50,11 @@ sources:
     subdir: "scripts/addons_core"
   gotchas:
     dir: corpus/curated # in-repo curated 5.x behavioral notes (committed)
+  # --- creative tier (INERT: acquirers unregistered; gathered via
+  # scripts/gather_creative_sources.py, NOT wired into the index yet) ---
+  stackexchange:
+    posts_xml: data/raw/stackexchange/Posts.xml # extracted archive.org dump
+    min_score: 5
+    since_year: 2019
+  dev_blog:
+    mode: archive # full WP REST archive; 'rss' for latest-only
