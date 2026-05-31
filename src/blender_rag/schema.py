@@ -33,6 +33,7 @@ class SourceType(StrEnum):
     # Creative/community tier (see docs/CREATIVE_SOURCES_PLAN.md). Acquirers may
     # exist but stay OUT of the default build until wiring is approved.
     STACKEXCHANGE = "stackexchange"
+    DEV_BLOG = "dev_blog"  # code.blender.org — dev rationale (CC-BY-SA)
 
 
 def stable_id(*parts: str) -> str:
