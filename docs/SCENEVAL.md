@@ -22,6 +22,13 @@ a pooled-error-rate / spread / low-n honesty footer). `--logs DIR` dumps every r
 `SessionLog` as JSON for re-scoring; `--json PATH` writes the machine-readable
 `AblationResult` aggregate for regression tracking across corpus/config changes.
 
+Inspect one session as a readable transcript (queries, execs, errors, inline
+gotcha flags, summary):
+
+```bash
+uv run python scripts/show_session.py <logs-dir>/island_on_0.json
+```
+
 ## Metrics (pure, deterministic — `sceneval/metrics.py`)
 
 | metric | better | meaning |
