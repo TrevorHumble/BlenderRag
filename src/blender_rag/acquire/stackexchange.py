@@ -42,7 +42,11 @@ def _license_for(year: int) -> str:
 
 
 def _question_entry(row: ET.Element) -> dict[str, str]:
-    return {"title": row.get("Title", ""), "tags": row.get("Tags", "")}
+    # SE stores tags as "<py><modifiers>"; ET already un-escaped the XML entities,
+    # so split the <..><..> form into a clean space-joined list.
+    raw = row.get("Tags", "")
+    tags = " ".join(t for t in raw.strip("<>").split("><") if t)
+    return {"title": row.get("Title", ""), "tags": tags}
 
 
 def _answer_to_document(
@@ -119,8 +123,10 @@ def iter_documents_from_posts_file(
     seen falls back to a generic title.
     """
     questions: dict[str, dict[str, str]] = {}
-    for _event, row in ET.iterparse(str(path), events=("end",)):
-        if row.tag != "row":
+    it = ET.iterparse(str(path), events=("start", "end"))
+    _, root = next(it)  # first 'start' is the <posts> root; keep it to detach rows
+    for event, row in it:
+        if event != "end" or row.tag != "row":
             continue
         ptype = row.get("PostTypeId")
         if ptype == "1":
@@ -129,7 +135,10 @@ def iter_documents_from_posts_file(
             doc = _answer_to_document(row, questions, min_score=min_score, since_year=since_year)
             if doc is not None:
                 yield doc
+        # row.clear() empties the row; root.clear() detaches accumulated rows so
+        # the parsed tree doesn't grow under root across the 192MB dump.
         row.clear()
+        root.clear()
 
 
 def extract_posts_xml(archive_7z: str | Path, dest_dir: str | Path) -> Path:
