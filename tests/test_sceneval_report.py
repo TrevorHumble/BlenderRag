@@ -43,6 +43,17 @@ def test_report_has_cross_task_summary_and_verdict():
     assert "✅" in md
 
 
+def test_report_has_pooled_and_spread_footer():
+    md = render_report(_results(3), backend_label="fake")
+    assert "Pooled error_rate" in md
+    assert "Spread (±pop. stdev)" in md
+
+
+def test_low_n_warning_shown_below_three():
+    assert "directional only" in render_report(_results(2), backend_label="fake")
+    assert "directional only" not in render_report(_results(3), backend_label="fake")
+
+
 def test_single_condition_renders_no_delta():
     metrics = [score(demo_session("solo", rag_enabled=True, run_index=0))]
     md = render_report(ablation(metrics), backend_label="fake")

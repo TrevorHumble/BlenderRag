@@ -115,9 +115,28 @@ def render_report(
                 f"| {f} | {off_mean:.3f} | {on_mean:.3f} | {_fmt(delta)} | {_verdict(f, delta)} |"
             )
         lines.append("")
+        lines += _stats_footer(on, off)
         lines.append(_headline(res))
         lines.append("")
     return "\n".join(lines)
+
+
+def _stats_footer(on, off) -> list[str]:
+    """Honesty footer: pooled error rate, spread, and a low-n caveat."""
+    spread = ", ".join(
+        f"{m} off ±{off.metrics[m].stdev:.2f} / on ±{on.metrics[m].stdev:.2f}"
+        for m in ("error_rate", "gotcha_hits", "task_signal_rate")
+    )
+    lines = [
+        f"_Pooled error_rate (sum errors / sum execs): off {off.pooled_error_rate:.3f} "
+        f"→ on {on.pooled_error_rate:.3f}._",
+        f"_Spread (±pop. stdev): {spread}._",
+    ]
+    n = min(on.n_runs, off.n_runs)
+    if n < 3:
+        lines.append(f"_⚠️ n={n} per condition — directional only, not significant._")
+    lines.append("")
+    return lines
 
 
 def _headline(res: AblationResult) -> str:
