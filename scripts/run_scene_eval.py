@@ -50,11 +50,24 @@ def run_fake(tasks: list[dict], n: int) -> list[SessionLog]:
 
 def run_live(tasks: list[dict], n: int, *, model: str, max_iter: int) -> list[SessionLog]:
     # Heavy + optional deps imported only on the live path.
+    import importlib.util
+    import os
+
+    from blender_rag.config import load_config
     from blender_rag.sceneval.backends import (
         AnthropicSceneAgent,
         InProcessRagSearcher,
         McpBlenderExecutor,
+        live_preflight,
     )
+
+    problems = live_preflight(
+        index_path=load_config().path("index"),
+        env=os.environ,
+        anthropic_available=importlib.util.find_spec("anthropic") is not None,
+    )
+    if problems:
+        raise SystemExit("live backend not ready:\n  - " + "\n  - ".join(problems))
 
     searcher = InProcessRagSearcher()  # the real RAG, loaded once
     executor = McpBlenderExecutor()  # one persistent live-Blender session

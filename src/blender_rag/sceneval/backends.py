@@ -18,10 +18,33 @@ CI-friendly.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
+from pathlib import Path
 from typing import Any
 
 from blender_rag.sceneval.runner import AgentAction, CodeResult
 from blender_rag.sceneval.schema import SceneSnapshot, SessionEvent
+
+
+def live_preflight(
+    *, index_path: str | Path, env: Mapping[str, str], anthropic_available: bool
+) -> list[str]:
+    """Return human-readable reasons the live backend can't run (empty == ready).
+
+    Checked before constructing anything so a live run fails fast with guidance
+    instead of a cryptic mid-session traceback. Blender reachability can't be
+    probed without connecting, so it's not checked here — just the local prereqs.
+    """
+    problems: list[str] = []
+    if not env.get("ANTHROPIC_API_KEY"):
+        problems.append("ANTHROPIC_API_KEY is not set (the agent driver needs it).")
+    if not anthropic_available:
+        problems.append("anthropic SDK not installed — run: uv sync --group eval")
+    if not Path(index_path).exists():
+        problems.append(
+            f"index not found at {index_path} — run: uv run python scripts/build_all.py"
+        )
+    return problems
 
 
 class InProcessRagSearcher:
