@@ -9,6 +9,7 @@ __pycache__/
 # Project data + build artifacts (large, regenerable)
 data/raw/
 data/*.jsonl
+data/creative/
 data/*.err
 index/
 *.zip
