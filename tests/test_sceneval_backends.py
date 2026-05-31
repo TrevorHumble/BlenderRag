@@ -8,8 +8,32 @@ Here we verify the pure conversation-threading logic of AnthropicSceneAgent.
 import json
 from types import SimpleNamespace
 
-from blender_rag.sceneval.backends import AnthropicSceneAgent
+from blender_rag.sceneval.backends import AnthropicSceneAgent, live_preflight
 from blender_rag.sceneval.schema import CodeExecEvent, RagQueryEvent
+
+
+def test_live_preflight_all_good(tmp_path):
+    idx = tmp_path / "idx"
+    idx.mkdir()
+    problems = live_preflight(
+        index_path=idx, env={"ANTHROPIC_API_KEY": "x"}, anthropic_available=True
+    )
+    assert problems == []
+
+
+def test_live_preflight_flags_missing_key(tmp_path):
+    idx = tmp_path / "idx"
+    idx.mkdir()
+    problems = live_preflight(index_path=idx, env={}, anthropic_available=True)
+    assert any("ANTHROPIC_API_KEY" in p for p in problems)
+
+
+def test_live_preflight_flags_missing_sdk_and_index(tmp_path):
+    problems = live_preflight(
+        index_path=tmp_path / "nope", env={"ANTHROPIC_API_KEY": "x"}, anthropic_available=False
+    )
+    assert any("anthropic" in p for p in problems)
+    assert any("index" in p for p in problems)
 
 
 def _tool_use(uid, name, inp):
