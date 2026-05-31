@@ -30,6 +30,9 @@ class SourceType(StrEnum):
     CODE = "code"
     BLENDERMCP = "blendermcp"
     GOTCHAS = "gotchas"
+    # Creative/community tier (see docs/CREATIVE_SOURCES_PLAN.md). Acquirers may
+    # exist but stay OUT of the default build until wiring is approved.
+    STACKEXCHANGE = "stackexchange"
 
 
 def stable_id(*parts: str) -> str:
