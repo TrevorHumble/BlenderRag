@@ -85,3 +85,10 @@ def test_string_footgun_still_counted_after_comment_strip():
 def test_code_before_comment_preserved():
     code = "scene.render.engine = 'BLENDER_EEVEE_NEXT'  # TODO fix"
     assert "eevee_next_engine_id" in _ids(code)
+
+
+def test_severity_classification():
+    raises = {h.rule_id: h.severity for h in detect_gotchas("BLENDER_EEVEE_NEXT")}
+    assert raises["eevee_next_engine_id"] == "raises"
+    silent = {h.rule_id: h.severity for h in detect_gotchas("node.glare_type = 'X'")}
+    assert silent["glare_type_attribute"] == "silent"
