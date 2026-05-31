@@ -14,6 +14,7 @@ DIRECTION: dict[str, str] = {
     "clean_run": "up",
     "query_before_call_rate": "up",
     "gotcha_hits": "down",
+    "task_signal_rate": "up",
     "scene_total": "up",
     "completed": "up",
     "code_executions": "neutral",

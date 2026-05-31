@@ -21,6 +21,7 @@ METRIC_FIELDS: tuple[str, ...] = (
     "clean_run",
     "query_before_call_rate",
     "gotcha_hits",
+    "task_signal_rate",
     "scene_total",
     "completed",
     "code_executions",

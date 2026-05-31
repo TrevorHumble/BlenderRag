@@ -80,6 +80,7 @@ def run_session(
     model: str = "",
     run_index: int = 0,
     max_iterations: int = 50,
+    success_hints: list[str] | None = None,
 ) -> SessionLog:
     """Run one build session and return its log.
 
@@ -130,4 +131,5 @@ def run_session(
         events=events,
         final_scene=executor.snapshot(),
         completed=completed,
+        success_hints=success_hints or [],
     )

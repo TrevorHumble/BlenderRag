@@ -62,6 +62,29 @@ def test_gotcha_counter_injection():
     assert score(log).gotcha_hits == 0  # no counter -> 0
 
 
+def test_task_signal_rate_fraction_of_hints_realized():
+    log = SessionLog(
+        task_id="t",
+        rag_enabled=True,
+        success_hints=["BLENDER_EEVEE", "AgX", "principled"],
+        events=[CodeExecEvent(code="engine='BLENDER_EEVEE'\nvt='AgX'", ok=True)],
+    )
+    assert abs(score(log).task_signal_rate - 2 / 3) < 1e-9
+
+
+def test_task_signal_rate_zero_without_hints():
+    log = _log([CodeExecEvent(code="anything", ok=True)])
+    assert score(log).task_signal_rate == 0.0
+
+
+def test_task_signal_rate_case_insensitive():
+    log = SessionLog(
+        task_id="t", rag_enabled=True, success_hints=["Principled"],
+        events=[CodeExecEvent(code="bsdf = nodes.new('ShaderNodeBsdfPrincipled')", ok=True)],
+    )
+    assert score(log).task_signal_rate == 1.0
+
+
 def test_counts_queries_iterations_scene():
     log = _log(
         [RagQueryEvent(query="x"), RagQueryEvent(query="y"), CodeExecEvent(code="a", ok=True)],

@@ -46,6 +46,21 @@ def query_before_call_rate(log: SessionLog) -> float:
     return grounded / execs if execs else 0.0
 
 
+def task_signal_rate(log: SessionLog) -> float:
+    """Fraction of the brief's ``success_hints`` that appear in executed code.
+
+    A task-correctness proxy: did the model actually realize what was asked
+    (case-insensitive substring across all executed code)? 0.0 when the task
+    declares no hints — so it never inflates a task that can't be measured.
+    """
+    hints = log.success_hints
+    if not hints:
+        return 0.0
+    code = "\n".join(e.code for e in _code_events(log)).lower()
+    found = sum(1 for h in hints if h.lower() in code)
+    return found / len(hints)
+
+
 def score(log: SessionLog, *, gotcha_counter: GotchaCounter | None = None) -> SessionMetrics:
     """Reduce a session log to its scalar metrics."""
     execs = _code_events(log)
@@ -69,6 +84,7 @@ def score(log: SessionLog, *, gotcha_counter: GotchaCounter | None = None) -> Se
         rag_queries=n_query,
         query_before_call_rate=query_before_call_rate(log),
         gotcha_hits=gotchas,
+        task_signal_rate=task_signal_rate(log),
         scene_total=log.final_scene.total if log.final_scene else 0,
         completed=log.completed,
     )
