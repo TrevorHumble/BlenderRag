@@ -35,6 +35,7 @@ VETTED: tuple[tuple[str, str, str], ...] = (
     ("Projectors", "https://github.com/Ocupe/Projectors.git", "gpl-3.0"),
     ("camera_shakify", "https://github.com/EatTheFuture/camera_shakify.git", "gpl-3.0"),
     ("fake-bpy-module", "https://github.com/nutti/fake-bpy-module.git", "mit"),
+    ("pynodes", "https://github.com/iplai/pynodes.git", "mit"),  # node-as-code (MIT, sell-safe)
 )
 
 WEB_BASE = "https://github.com"

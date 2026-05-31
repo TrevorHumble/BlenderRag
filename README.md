@@ -140,5 +140,9 @@ task-level scene-eval harness (Layer A, #50) measures RAG impact end-to-end.
 
 Deferred (see [issues](https://github.com/TrevorHumble/BlenderRag/issues)):
 contextual retrieval via Ollama (#8) — the one expensive ingestion step — and the
-higher-volume community sources (Stack Exchange, forums, YouTube; plan in
-[docs/CREATIVE_SOURCES_PLAN.md](docs/CREATIVE_SOURCES_PLAN.md), Phase 1 = #49).
+higher-volume community sources. **Sources gathering is underway** (inert, not yet
+wired): Stack Exchange + code.blender.org + third-party add-ons acquirers exist and
+~6.3k creative-tier docs are prepped via `scripts/gather_creative_sources.py`. See
+[docs/SOURCES_AND_WEIGHTING.md](docs/SOURCES_AND_WEIGHTING.md) for the trust-weight
+model + the commercial-clean vs personal-full split, and
+[docs/CREATIVE_SOURCES_PLAN.md](docs/CREATIVE_SOURCES_PLAN.md) (Phase 1 = #49, backlog = #72).
