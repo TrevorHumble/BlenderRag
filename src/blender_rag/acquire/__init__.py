@@ -8,6 +8,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 
+from blender_rag.acquire.addons import acquire_addons
 from blender_rag.acquire.blendermcp import acquire_blendermcp
 from blender_rag.acquire.bpy_api import acquire_bpy_api
 from blender_rag.acquire.dev_docs import acquire_dev_docs
@@ -24,6 +25,7 @@ ACQUIRERS = {
     "manual": acquire_manual,
     "dev_docs": acquire_dev_docs,
     "blendermcp": acquire_blendermcp,
+    "addons_core": acquire_addons,
     "gotchas": acquire_gotchas,
 }
 
@@ -37,6 +39,7 @@ def acquire_all(cfg: Config | None = None) -> Iterator[Document]:
 
 __all__ = [
     "ACQUIRERS",
+    "acquire_addons",
     "acquire_all",
     "acquire_blendermcp",
     "acquire_bpy_api",
