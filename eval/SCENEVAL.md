@@ -4,6 +4,16 @@ Backend: **fake**. 3 tasks x 3 runs/condition.
 
 > ⚠️ **Synthetic backend** — this exercises the harness plumbing, not a real measurement. Real numbers require the live backend.
 
+## Summary
+
+RAG helped on **3/3** tasks (net of error_rate, gotcha_hits, task_signal_rate, grounding).
+
+| task | Δ error_rate | Δ gotcha_hits | Δ task_signal | Δ grounding | RAG |
+|------|-------------:|--------------:|--------------:|------------:|:---:|
+| floating_island | -0.389 | -2.000 | +0.667 | +1.000 | ✅ |
+| moody_interior | -0.389 | -2.000 | +1.000 | +1.000 | ✅ |
+| procedural_rocks | -0.389 | -2.000 | +1.000 | +1.000 | ✅ |
+
 ## floating_island  (RAG-on n=3, RAG-off n=3)
 
 | metric | RAG-off | RAG-on | Δ (on−off) | |

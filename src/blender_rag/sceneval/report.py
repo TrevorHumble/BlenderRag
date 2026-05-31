@@ -36,6 +36,49 @@ def _fmt(x: float) -> str:
     return f"{x:+.3f}" if x else "0"
 
 
+_KEY_METRICS = ("error_rate", "gotcha_hits", "task_signal_rate", "query_before_call_rate")
+
+
+def _task_helped(res: AblationResult) -> bool | None:
+    """Did RAG help this task overall? None if no on/off comparison exists."""
+    if not (res.rag_on and res.rag_off):
+        return None
+    good = bad = 0
+    for m in _KEY_METRICS:
+        d = res.deltas.get(m, 0.0)
+        if abs(d) < 1e-9:
+            continue
+        improved = (d < 0) if DIRECTION.get(m) == "down" else (d > 0)
+        good, bad = (good + 1, bad) if improved else (good, bad + 1)
+    return good > bad
+
+
+def _summary_section(results: list[AblationResult]) -> list[str]:
+    comparable = [r for r in results if r.rag_on and r.rag_off]
+    if not comparable:
+        return []
+    helped = sum(1 for r in comparable if _task_helped(r))
+    lines = [
+        "## Summary",
+        "",
+        f"RAG helped on **{helped}/{len(comparable)}** tasks "
+        "(net of error_rate, gotcha_hits, task_signal_rate, grounding).",
+        "",
+        "| task | Δ error_rate | Δ gotcha_hits | Δ task_signal | Δ grounding | RAG |",
+        "|------|-------------:|--------------:|--------------:|------------:|:---:|",
+    ]
+    for r in comparable:
+        d = r.deltas
+        verdict = "✅" if _task_helped(r) else "➖"
+        lines.append(
+            f"| {r.task_id} | {_fmt(d.get('error_rate', 0))} | "
+            f"{_fmt(d.get('gotcha_hits', 0))} | {_fmt(d.get('task_signal_rate', 0))} | "
+            f"{_fmt(d.get('query_before_call_rate', 0))} | {verdict} |"
+        )
+    lines.append("")
+    return lines
+
+
 def render_report(
     results: list[AblationResult], *, backend_label: str = "", n_note: str = ""
 ) -> str:
@@ -49,6 +92,7 @@ def render_report(
             "not a real measurement. Real numbers require the live backend.",
         ]
     lines.append("")
+    lines += _summary_section(results)
 
     for res in results:
         on = res.rag_on

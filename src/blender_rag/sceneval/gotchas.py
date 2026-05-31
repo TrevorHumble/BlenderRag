@@ -110,8 +110,35 @@ RULES: tuple[GotchaRule, ...] = (
 )
 
 
+def _strip_line_comments(code: str) -> str:
+    """Drop ``#`` line comments so a self-aware note ("# avoid NISHITA") isn't
+    counted as a footgun. Conservative: only strips ``#`` that is not inside a
+    quoted string on that line (the footgun *values* live in strings, so we must
+    not strip those)."""
+    out: list[str] = []
+    for line in code.splitlines():
+        in_str: str | None = None
+        cut = len(line)
+        for i, ch in enumerate(line):
+            if in_str:
+                if ch == in_str:
+                    in_str = None
+            elif ch in "'\"":
+                in_str = ch
+            elif ch == "#":
+                cut = i
+                break
+        out.append(line[:cut])
+    return "\n".join(out)
+
+
 def detect_gotchas(code: str) -> list[GotchaHit]:
-    """Return every 5.x footgun occurrence in ``code`` (one hit per match)."""
+    """Return every 5.x footgun occurrence in ``code`` (one hit per match).
+
+    Line comments are stripped first so commentary doesn't inflate the count;
+    string contents are preserved (the footgun enum values live in strings).
+    """
+    code = _strip_line_comments(code)
     hits: list[GotchaHit] = []
     for rule in RULES:
         for match in rule.finder(code):
