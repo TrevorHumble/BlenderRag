@@ -52,3 +52,11 @@
 {"query": "eevee rendering changes in blender 5.1", "type": "release_notes", "expect": ["release_notes/5.1/eevee"], "filter": {"blender_version": "5.1"}}
 {"query": "cycles changes in blender 5.0", "type": "release_notes", "expect": ["release_notes/5.0/cycles"], "filter": {"blender_version": "5.0"}}
 {"query": "how to set up a development environment", "type": "dev_docs", "expect": ["handbook"]}
+{"query": "how does the extension package manager install an add-on", "type": "code", "expect": ["bl_extension_ops"]}
+{"query": "notify the user about extension updates in the addon UI", "type": "code", "expect": ["bl_extension_notify"]}
+{"query": "displace modifier texture strength and direction", "type": "api", "expect": ["DisplaceModifier"]}
+{"query": "bevel modifier width segments and angle limit", "type": "api", "expect": ["BevelModifier"]}
+{"query": "create a new collection via the data API not an operator", "type": "api", "expect": ["BlendDataCollections"]}
+{"query": "add a mesh object to a collection objects list in python", "type": "api", "expect": ["CollectionObjects"]}
+{"query": "set the active scene render engine to eevee", "type": "api", "expect": ["RenderSettings.engine"]}
+{"query": "geometry node to distribute points on faces", "type": "api", "expect": ["GeometryNodeDistributePointsOnFaces"]}
