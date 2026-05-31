@@ -57,10 +57,12 @@ leak between runs.
 
 ## Live requirements
 
-- `ANTHROPIC_API_KEY` set (the agent), and the `anthropic` SDK installed.
+- Install the deps: `uv sync --group ml --group eval` (`eval` adds the `anthropic`
+  SDK; `ml` covers the in-process searcher + the MCP Blender client).
+- `ANTHROPIC_API_KEY` set (the agent driver).
 - Blender open with the BlenderMCP addon + the bridge (`uvx blender-mcp`) reachable
   (the executor talks to `execute_blender_code` / `get_scene_info`).
-- A built index (`scripts/build_all.py`) + the `ml` deps (the in-process searcher).
+- A built index (`scripts/build_all.py`) for the in-process searcher.
 
 ## Status / next (Layer B)
 
