@@ -99,8 +99,17 @@ add-ons 🟡, BlenderMCP 🟢(MIT), curated gotchas.
   version-mix is stark — **140 current · 3,376 dated_valid · 2,494 stale** — which is
   the empirical case *for* the trust-weight: admit the volume, float the durable.
   Still **not wired** into the index.
-- 🟡/🟢 **Third-party add-ons** — `acquire/addons_thirdparty.py` (vetted GPL + the
-  MIT `fake-bpy-module`). Clone + manifest-gate; not wired.
+- 🟡/🟢 **Third-party add-ons** — `acquire/addons_thirdparty.py` (vetted GPL + MIT
+  `fake-bpy-module` + MIT `pynodes`). Clone + manifest-gate; not wired.
+- 🟡 **code.blender.org dev blog** — `acquire/dev_blog.py`. **Built + validated
+  2026-05-31:** full WP REST archive = **248 posts, 2010→2026** (30 current / 218
+  dated_valid), CC-BY-SA. Prepped to `data/creative/dev_blog.jsonl`. Not wired.
+- 🟢 **`.blend` node-graph miner** — `acquire/blend_nodes.py` (`serialize_node_graph`
+  pure + `node_tree_to_graph` bpy). The extractor for Demo Files / open-movie graphs.
+
+**Gather + prep:** `scripts/gather_creative_sources.py` runs the inert acquirers →
+normalized `data/creative/<source>.jsonl` (gitignored). Prepped so far: dev_blog
+(248), stackexchange (6,010) — **6,258 creative-tier docs staged, none wired.**
 
 **Planned (from CREATIVE_SOURCES_PLAN):** devtalk 🔴, Blender Artists 🔴 (Discourse
 `.json`); YouTube CC-BY 🟢 (Data API, supervised). Reddit — **excluded** (ToS/legal).
