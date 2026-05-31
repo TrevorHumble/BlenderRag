@@ -79,6 +79,22 @@ uv run python scripts/verify_mcp.py   # end-to-end MCP handshake check
 The first run downloads the sources (~340 MB of git clones + the 88 MB API zip)
 and the embedding/reranker models. Re-runs are incremental and idempotent.
 
+## Evaluating the RAG
+
+Two layers, two questions:
+
+- **L1 — retrieval** (`scripts/eval.py`, `eval/RESULTS.md`): over labeled queries,
+  does the right chunk rank top-k? Cheap, deterministic regression gate.
+- **L3 — task** (`scripts/run_scene_eval.py`, [docs/SCENEVAL.md](docs/SCENEVAL.md)):
+  does the RAG make a model *build a better scene*? It runs an agent through an
+  iterative Blender build session **RAG-on vs RAG-off** and reports the delta in
+  API error rate, 5.x gotcha hits, doc-grounding, and brief-coverage.
+
+```bash
+uv run python scripts/run_scene_eval.py --n 3 --backend fake   # plumbing demo
+uv run python scripts/run_scene_eval.py --n 5 --backend live   # real (key + Blender)
+```
+
 ## Connect to Claude Code
 
 The repo ships a project-scoped `.mcp.json` and a
@@ -108,18 +124,21 @@ something to search.
 Working end to end. A real MCP client handshake (`scripts/verify_mcp.py`) lists
 the tool and retrieves Blender 5.1 results.
 
-**Sources indexed (32,279 chunks):** the full bpy API reference (~23k per-symbol
-docs), the manual (~2,200 RST pages), release notes (5.0 + 5.1), the developer
-handbook, and the BlenderMCP addon source.
+**Sources indexed (37,354 chunks):** the full bpy API reference (~23k per-symbol
+docs + per-class summaries), the manual (~2,200 RST pages), release notes (5.0 +
+5.1), the developer handbook, the core add-on source (#4), curated 5.x gotchas, and
+the BlenderMCP addon source.
 **Retrieval:** plain hybrid (dense BGE-M3 + BM25) fused with RRF — the default.
 A cross-encoder reranker and a leaf-symbol-name boost are both wired up as opt-in
 flags, but the eval showed neither beats plain hybrid for API lookup (the reranker
 actually hurts), so they're **off by default**. Every chunk is tagged with its
 Blender version.
-**Measured quality** (`eval/RESULTS.md`, 54 labeled queries): hit@k **0.759**;
-manual / dev docs / BlenderMCP at 1.000; API 0.657 is the weak spot (#27).
+**Measured quality** (`eval/RESULTS.md`, 62 labeled queries): default hybrid hit@k
+**0.778**; manual / dev docs / release notes at 1.000; the API symbol gap is the
+weak spot, recovered by routing to `source_type="api"` + `top_k=8` (#41). A
+task-level scene-eval harness (Layer A, #50) measures RAG impact end-to-end.
 
 Deferred (see [issues](https://github.com/TrevorHumble/BlenderRag/issues)):
-core add-on source — needs the full `blender/blender` clone (#4), contextual
-retrieval via Ollama (#8) — the one expensive ingestion step — and the
-higher-volume/ToS-flagged community sources (Stack Exchange, forums, YouTube).
+contextual retrieval via Ollama (#8) — the one expensive ingestion step — and the
+higher-volume community sources (Stack Exchange, forums, YouTube; plan in
+[docs/CREATIVE_SOURCES_PLAN.md](docs/CREATIVE_SOURCES_PLAN.md), Phase 1 = #49).
