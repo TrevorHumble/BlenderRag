@@ -74,3 +74,18 @@ def test_ablation_no_delta_when_condition_missing():
 def test_ablation_groups_and_sorts_by_task():
     res = ablation([_m("b", True), _m("a", False)])
     assert [r.task_id for r in res] == ["a", "b"]
+
+
+def test_pooled_error_rate_differs_from_mean_of_ratios():
+    agg = aggregate_condition([
+        _m("t", True, code_executions=1, code_errors=1, error_rate=1.0),
+        _m("t", True, code_executions=4, code_errors=1, error_rate=0.25),
+    ])
+    # mean-of-ratios = 0.625, but pooled = (1+1)/(1+4) = 0.4
+    assert agg.metrics["error_rate"].mean == 0.625
+    assert abs(agg.pooled_error_rate - 0.4) < 1e-9
+
+
+def test_pooled_error_rate_zero_when_no_execs():
+    agg = aggregate_condition([_m("t", True, code_executions=0, code_errors=0)])
+    assert agg.pooled_error_rate == 0.0

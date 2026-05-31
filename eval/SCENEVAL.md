@@ -30,6 +30,9 @@ RAG helped on **3/3** tasks (net of error_rate, gotcha_hits, task_signal_rate, g
 | rag_queries | 0.000 | 2.000 | +2.000 | · |
 | iterations | 3.333 | 4.000 | +0.667 | · |
 
+_Pooled error_rate (sum errors / sum execs): off 0.400 → on 0.000._
+_Spread (±pop. stdev): error_rate off ±0.08 / on ±0.00, gotcha_hits off ±0.00 / on ±0.00, task_signal_rate off ±0.00 / on ±0.00._
+
 **RAG effect:** error rate -0.39, gotchas -2.00, grounding +1.00 (negative error/gotchas = better).
 
 ## moody_interior  (RAG-on n=3, RAG-off n=3)
@@ -48,6 +51,9 @@ RAG helped on **3/3** tasks (net of error_rate, gotcha_hits, task_signal_rate, g
 | rag_queries | 0.000 | 2.000 | +2.000 | · |
 | iterations | 3.333 | 4.000 | +0.667 | · |
 
+_Pooled error_rate (sum errors / sum execs): off 0.400 → on 0.000._
+_Spread (±pop. stdev): error_rate off ±0.08 / on ±0.00, gotcha_hits off ±0.00 / on ±0.00, task_signal_rate off ±0.00 / on ±0.00._
+
 **RAG effect:** error rate -0.39, gotchas -2.00, grounding +1.00 (negative error/gotchas = better).
 
 ## procedural_rocks  (RAG-on n=3, RAG-off n=3)
@@ -65,5 +71,8 @@ RAG helped on **3/3** tasks (net of error_rate, gotcha_hits, task_signal_rate, g
 | code_errors | 1.333 | 0.000 | -1.333 | ✅ |
 | rag_queries | 0.000 | 2.000 | +2.000 | · |
 | iterations | 3.333 | 4.000 | +0.667 | · |
+
+_Pooled error_rate (sum errors / sum execs): off 0.400 → on 0.000._
+_Spread (±pop. stdev): error_rate off ±0.08 / on ±0.00, gotcha_hits off ±0.00 / on ±0.00, task_signal_rate off ±0.00 / on ±0.00._
 
 **RAG effect:** error rate -0.39, gotchas -2.00, grounding +1.00 (negative error/gotchas = better).

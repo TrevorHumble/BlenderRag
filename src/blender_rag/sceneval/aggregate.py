@@ -45,6 +45,9 @@ class ConditionAggregate(BaseModel):
     rag_enabled: bool
     n_runs: int
     metrics: dict[str, MetricSummary]
+    # Pooled (sum errors / sum execs) — unlike metrics['error_rate'].mean, which
+    # is a mean-of-ratios that weights a 1/1 run like a 2/20 run.
+    pooled_error_rate: float = 0.0
 
 
 class AblationResult(BaseModel):
@@ -76,11 +79,14 @@ def aggregate_condition(metrics: list[SessionMetrics]) -> ConditionAggregate:
         for field in METRIC_FIELDS
     }
     head = metrics[0] if metrics else None
+    total_exec = sum(m.code_executions for m in metrics)
+    total_err = sum(m.code_errors for m in metrics)
     return ConditionAggregate(
         task_id=head.task_id if head else "",
         rag_enabled=head.rag_enabled if head else False,
         n_runs=len(metrics),
         metrics=summaries,
+        pooled_error_rate=(total_err / total_exec) if total_exec else 0.0,
     )
 
 
