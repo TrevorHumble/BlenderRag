@@ -16,8 +16,13 @@ from __future__ import annotations
 import re
 from collections.abc import Callable
 from dataclasses import dataclass
+from typing import Literal
 
 from pydantic import BaseModel
+
+# How a footgun fails: "raises" => the call errors at runtime (a lost iteration);
+# "silent" => it runs but produces a wrong scene/render (worse to catch by eye).
+Severity = Literal["raises", "silent"]
 
 
 class GotchaHit(BaseModel):
@@ -27,6 +32,7 @@ class GotchaHit(BaseModel):
     message: str
     fix: str
     match: str
+    severity: Severity = "raises"
 
 
 def _regex_finder(pattern: str, flags: int = 0) -> Callable[[str], list[str]]:
@@ -61,6 +67,7 @@ class GotchaRule:
     message: str
     fix: str
     finder: Callable[[str], list[str]]
+    severity: Severity = "raises"
 
 
 # High-confidence, low-false-positive rules. Each maps a 4.x habit to its 5.x fix.
@@ -88,6 +95,7 @@ RULES: tuple[GotchaRule, ...] = (
         "Glare node config moved to input sockets in 5.x; .glare_type is unreliable.",
         "Set the Glare values via node.inputs[...] sockets, not a .glare_type attr.",
         _regex_finder(r"\.glare_type\b"),
+        severity="silent",  # may no-op rather than raise -> wrong render, not a crash
     ),
     GotchaRule(
         "bgl_module_removed",
@@ -143,7 +151,13 @@ def detect_gotchas(code: str) -> list[GotchaHit]:
     for rule in RULES:
         for match in rule.finder(code):
             hits.append(
-                GotchaHit(rule_id=rule.id, message=rule.message, fix=rule.fix, match=match)
+                GotchaHit(
+                    rule_id=rule.id,
+                    message=rule.message,
+                    fix=rule.fix,
+                    match=match,
+                    severity=rule.severity,
+                )
             )
     return hits
 
