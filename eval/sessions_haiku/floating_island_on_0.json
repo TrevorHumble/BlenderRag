@@ -1,0 +1,15 @@
+{
+  "task_id": "floating_island",
+  "rag_enabled": true,
+  "run_index": 0,
+  "model": "claude-haiku (headless)",
+  "queries": [
+    {"query": "create mesh primitive cube add bpy.ops.mesh", "source_type": "api", "n_hits": 8},
+    {"query": "add subdivision surface modifier object", "source_type": "api", "n_hits": 8},
+    {"query": "principled BSDF material nodes base color roughness", "source_type": "api", "n_hits": 8},
+    {"query": "sun light add bpy.ops.object.light_add", "source_type": "api", "n_hits": 8},
+    {"query": "view transform AgX scene view settings", "source_type": "gotchas", "n_hits": 6},
+    {"query": "displace modifier texture noise procedural", "source_type": "api", "n_hits": 8}
+  ],
+  "notes": "RAG confirmed the AgX view_transform casing and the SUBSURF/DISPLACE modifier type enums."
+}

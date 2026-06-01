@@ -1,0 +1,1 @@
+{"task_id": "procedural_rocks", "rag_enabled": false, "run_index": 1, "model": "claude-haiku (headless)", "queries": [], "notes": "Medium confidence on node type names and socket connections for 5.1 geometry nodes; rotation via SetPosition may need refinement (could use Rotate node instead); scale application to instances may require Transform node tweaking."}

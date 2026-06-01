@@ -1,0 +1,1 @@
+{"task_id": "floating_island", "rag_enabled": false, "run_index": 3, "model": "claude-haiku (headless)", "queries": [], "notes": "High confidence in core mesh/material setup and sun light; moderate confidence in AgX view_transform casing and EEVEE config details for 5.1 — relying on memory of 5.0+ changes."}

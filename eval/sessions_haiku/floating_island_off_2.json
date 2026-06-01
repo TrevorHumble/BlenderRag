@@ -1,0 +1,1 @@
+{"task_id": "floating_island", "rag_enabled": false, "run_index": 2, "model": "claude-haiku (headless)", "queries": [], "notes": "Moderate confidence: 5.1 AgX view_transform casing verified from memory, Eevee Next engine ID uncertain (may need 'BLENDER_EEVEE_NEXT' vs 'BLENDER_EEVEE'), displace modifier strength and subdivision API assumed stable from 4.x patterns."}

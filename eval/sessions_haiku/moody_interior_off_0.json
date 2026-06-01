@@ -1,0 +1,1 @@
+{"task_id": "moody_interior", "rag_enabled": false, "run_index": 0, "model": "claude-haiku (headless)", "queries": [], "notes": "Confidence: moderate on basic geometry/materials/lights; lower on Eevee Next volumetrics node setup due from-memory knowledge cutoff at Feb 2025 and Eevee Next compositor restructuring."}

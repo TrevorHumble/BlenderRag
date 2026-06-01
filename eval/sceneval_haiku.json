@@ -1,0 +1,626 @@
+[
+  {
+    "task_id": "floating_island",
+    "rag_on": {
+      "task_id": "floating_island",
+      "rag_enabled": true,
+      "n_runs": 5,
+      "metrics": {
+        "error_rate": {
+          "n": 5,
+          "mean": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "stdev": 0.0
+        },
+        "clean_run": {
+          "n": 5,
+          "mean": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "stdev": 0.0
+        },
+        "query_before_call_rate": {
+          "n": 5,
+          "mean": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "stdev": 0.0
+        },
+        "gotcha_hits": {
+          "n": 5,
+          "mean": 0.2,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 1.0,
+          "stdev": 0.4
+        },
+        "task_signal_rate": {
+          "n": 5,
+          "mean": 0.8666666666666666,
+          "median": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0,
+          "stdev": 0.16329931618554522
+        },
+        "scene_total": {
+          "n": 5,
+          "mean": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "stdev": 0.0
+        },
+        "completed": {
+          "n": 5,
+          "mean": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "stdev": 0.0
+        },
+        "code_executions": {
+          "n": 5,
+          "mean": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "stdev": 0.0
+        },
+        "code_errors": {
+          "n": 5,
+          "mean": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "stdev": 0.0
+        },
+        "rag_queries": {
+          "n": 5,
+          "mean": 7.8,
+          "median": 8.0,
+          "min": 6.0,
+          "max": 9.0,
+          "stdev": 0.9797958971132712
+        },
+        "iterations": {
+          "n": 5,
+          "mean": 8.8,
+          "median": 9.0,
+          "min": 7.0,
+          "max": 10.0,
+          "stdev": 0.9797958971132712
+        }
+      },
+      "pooled_error_rate": 0.0
+    },
+    "rag_off": {
+      "task_id": "floating_island",
+      "rag_enabled": false,
+      "n_runs": 5,
+      "metrics": {
+        "error_rate": {
+          "n": 5,
+          "mean": 0.2,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 1.0,
+          "stdev": 0.4
+        },
+        "clean_run": {
+          "n": 5,
+          "mean": 0.8,
+          "median": 1.0,
+          "min": 0.0,
+          "max": 1.0,
+          "stdev": 0.4
+        },
+        "query_before_call_rate": {
+          "n": 5,
+          "mean": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "stdev": 0.0
+        },
+        "gotcha_hits": {
+          "n": 5,
+          "mean": 0.4,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 1.0,
+          "stdev": 0.4898979485566356
+        },
+        "task_signal_rate": {
+          "n": 5,
+          "mean": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "stdev": 0.0
+        },
+        "scene_total": {
+          "n": 5,
+          "mean": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "stdev": 0.0
+        },
+        "completed": {
+          "n": 5,
+          "mean": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "stdev": 0.0
+        },
+        "code_executions": {
+          "n": 5,
+          "mean": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "stdev": 0.0
+        },
+        "code_errors": {
+          "n": 5,
+          "mean": 0.2,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 1.0,
+          "stdev": 0.4
+        },
+        "rag_queries": {
+          "n": 5,
+          "mean": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "stdev": 0.0
+        },
+        "iterations": {
+          "n": 5,
+          "mean": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "stdev": 0.0
+        }
+      },
+      "pooled_error_rate": 0.2
+    },
+    "deltas": {
+      "error_rate": -0.2,
+      "clean_run": 0.19999999999999996,
+      "query_before_call_rate": 1.0,
+      "gotcha_hits": -0.2,
+      "task_signal_rate": -0.13333333333333341,
+      "scene_total": 0.0,
+      "completed": 0.0,
+      "code_executions": 0.0,
+      "code_errors": -0.2,
+      "rag_queries": 7.8,
+      "iterations": 7.800000000000001
+    }
+  },
+  {
+    "task_id": "moody_interior",
+    "rag_on": {
+      "task_id": "moody_interior",
+      "rag_enabled": true,
+      "n_runs": 5,
+      "metrics": {
+        "error_rate": {
+          "n": 5,
+          "mean": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "stdev": 0.0
+        },
+        "clean_run": {
+          "n": 5,
+          "mean": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "stdev": 0.0
+        },
+        "query_before_call_rate": {
+          "n": 5,
+          "mean": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "stdev": 0.0
+        },
+        "gotcha_hits": {
+          "n": 5,
+          "mean": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "stdev": 0.0
+        },
+        "task_signal_rate": {
+          "n": 5,
+          "mean": 0.7333333333333333,
+          "median": 0.6666666666666666,
+          "min": 0.6666666666666666,
+          "max": 1.0,
+          "stdev": 0.13333333333333336
+        },
+        "scene_total": {
+          "n": 5,
+          "mean": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "stdev": 0.0
+        },
+        "completed": {
+          "n": 5,
+          "mean": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "stdev": 0.0
+        },
+        "code_executions": {
+          "n": 5,
+          "mean": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "stdev": 0.0
+        },
+        "code_errors": {
+          "n": 5,
+          "mean": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "stdev": 0.0
+        },
+        "rag_queries": {
+          "n": 5,
+          "mean": 7.0,
+          "median": 7.0,
+          "min": 6.0,
+          "max": 9.0,
+          "stdev": 1.0954451150103321
+        },
+        "iterations": {
+          "n": 5,
+          "mean": 8.0,
+          "median": 8.0,
+          "min": 7.0,
+          "max": 10.0,
+          "stdev": 1.0954451150103321
+        }
+      },
+      "pooled_error_rate": 0.0
+    },
+    "rag_off": {
+      "task_id": "moody_interior",
+      "rag_enabled": false,
+      "n_runs": 5,
+      "metrics": {
+        "error_rate": {
+          "n": 5,
+          "mean": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "stdev": 0.0
+        },
+        "clean_run": {
+          "n": 5,
+          "mean": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "stdev": 0.0
+        },
+        "query_before_call_rate": {
+          "n": 5,
+          "mean": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "stdev": 0.0
+        },
+        "gotcha_hits": {
+          "n": 5,
+          "mean": 1.2,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 2.0,
+          "stdev": 0.4
+        },
+        "task_signal_rate": {
+          "n": 5,
+          "mean": 0.6666666666666666,
+          "median": 0.6666666666666666,
+          "min": 0.6666666666666666,
+          "max": 0.6666666666666666,
+          "stdev": 0.0
+        },
+        "scene_total": {
+          "n": 5,
+          "mean": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "stdev": 0.0
+        },
+        "completed": {
+          "n": 5,
+          "mean": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "stdev": 0.0
+        },
+        "code_executions": {
+          "n": 5,
+          "mean": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "stdev": 0.0
+        },
+        "code_errors": {
+          "n": 5,
+          "mean": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "stdev": 0.0
+        },
+        "rag_queries": {
+          "n": 5,
+          "mean": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "stdev": 0.0
+        },
+        "iterations": {
+          "n": 5,
+          "mean": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "stdev": 0.0
+        }
+      },
+      "pooled_error_rate": 0.0
+    },
+    "deltas": {
+      "error_rate": 0.0,
+      "clean_run": 0.0,
+      "query_before_call_rate": 1.0,
+      "gotcha_hits": -1.2,
+      "task_signal_rate": 0.06666666666666665,
+      "scene_total": 0.0,
+      "completed": 0.0,
+      "code_executions": 0.0,
+      "code_errors": 0.0,
+      "rag_queries": 7.0,
+      "iterations": 7.0
+    }
+  },
+  {
+    "task_id": "procedural_rocks",
+    "rag_on": {
+      "task_id": "procedural_rocks",
+      "rag_enabled": true,
+      "n_runs": 5,
+      "metrics": {
+        "error_rate": {
+          "n": 5,
+          "mean": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "stdev": 0.0
+        },
+        "clean_run": {
+          "n": 5,
+          "mean": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "stdev": 0.0
+        },
+        "query_before_call_rate": {
+          "n": 5,
+          "mean": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "stdev": 0.0
+        },
+        "gotcha_hits": {
+          "n": 5,
+          "mean": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "stdev": 0.0
+        },
+        "task_signal_rate": {
+          "n": 5,
+          "mean": 0.9333333333333333,
+          "median": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0,
+          "stdev": 0.13333333333333336
+        },
+        "scene_total": {
+          "n": 5,
+          "mean": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "stdev": 0.0
+        },
+        "completed": {
+          "n": 5,
+          "mean": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "stdev": 0.0
+        },
+        "code_executions": {
+          "n": 5,
+          "mean": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "stdev": 0.0
+        },
+        "code_errors": {
+          "n": 5,
+          "mean": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "stdev": 0.0
+        },
+        "rag_queries": {
+          "n": 5,
+          "mean": 8.2,
+          "median": 8.0,
+          "min": 7.0,
+          "max": 9.0,
+          "stdev": 0.7483314773547883
+        },
+        "iterations": {
+          "n": 5,
+          "mean": 9.2,
+          "median": 9.0,
+          "min": 8.0,
+          "max": 10.0,
+          "stdev": 0.7483314773547883
+        }
+      },
+      "pooled_error_rate": 0.0
+    },
+    "rag_off": {
+      "task_id": "procedural_rocks",
+      "rag_enabled": false,
+      "n_runs": 5,
+      "metrics": {
+        "error_rate": {
+          "n": 5,
+          "mean": 0.2,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 1.0,
+          "stdev": 0.4
+        },
+        "clean_run": {
+          "n": 5,
+          "mean": 0.8,
+          "median": 1.0,
+          "min": 0.0,
+          "max": 1.0,
+          "stdev": 0.4
+        },
+        "query_before_call_rate": {
+          "n": 5,
+          "mean": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "stdev": 0.0
+        },
+        "gotcha_hits": {
+          "n": 5,
+          "mean": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "stdev": 0.0
+        },
+        "task_signal_rate": {
+          "n": 5,
+          "mean": 0.9333333333333333,
+          "median": 1.0,
+          "min": 0.6666666666666666,
+          "max": 1.0,
+          "stdev": 0.13333333333333336
+        },
+        "scene_total": {
+          "n": 5,
+          "mean": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "stdev": 0.0
+        },
+        "completed": {
+          "n": 5,
+          "mean": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "stdev": 0.0
+        },
+        "code_executions": {
+          "n": 5,
+          "mean": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "stdev": 0.0
+        },
+        "code_errors": {
+          "n": 5,
+          "mean": 0.2,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 1.0,
+          "stdev": 0.4
+        },
+        "rag_queries": {
+          "n": 5,
+          "mean": 0.0,
+          "median": 0.0,
+          "min": 0.0,
+          "max": 0.0,
+          "stdev": 0.0
+        },
+        "iterations": {
+          "n": 5,
+          "mean": 1.0,
+          "median": 1.0,
+          "min": 1.0,
+          "max": 1.0,
+          "stdev": 0.0
+        }
+      },
+      "pooled_error_rate": 0.2
+    },
+    "deltas": {
+      "error_rate": -0.2,
+      "clean_run": 0.19999999999999996,
+      "query_before_call_rate": 1.0,
+      "gotcha_hits": 0.0,
+      "task_signal_rate": 0.0,
+      "scene_total": 0.0,
+      "completed": 0.0,
+      "code_executions": 0.0,
+      "code_errors": -0.2,
+      "rag_queries": 8.2,
+      "iterations": 8.2
+    }
+  }
+]

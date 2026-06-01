@@ -1,0 +1,1 @@
+{"task_id": "floating_island", "rag_enabled": false, "run_index": 0, "model": "claude-haiku (headless)", "queries": [], "notes": "AgX view transform casing ('AgX' not 'AgX') and Eevee Next engine ID ('BLENDER_EEVEE') from memory; displacement + subdivision for rocky base, cone for low-poly trees, soft daylight via world background and sun light."}
