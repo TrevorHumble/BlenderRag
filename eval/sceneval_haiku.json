@@ -1,0 +1,108 @@
+{
+  "stat": {
+    "off": {
+      "scripts": 15,
+      "ops": 133,
+      "bad_ops": 1,
+      "nodes": 62,
+      "bad_nodes": 10,
+      "gotchas": 20,
+      "fail": 4
+    },
+    "on": {
+      "scripts": 15,
+      "ops": 133,
+      "bad_ops": 0,
+      "nodes": 78,
+      "bad_nodes": 10,
+      "gotchas": 2,
+      "fail": 3
+    }
+  },
+  "named": {
+    "off": {
+      "ops": {
+        "bpy.ops.mesh.noise": 1
+      },
+      "nodes": {
+        "ShaderNodePrincipled": 4,
+        "GeometryNodeDisplace": 1,
+        "GeometryNodeRandomValue": 2,
+        "GeometryNodeInputRandomValue": 2,
+        "GeometryNodeScale": 1
+      },
+      "gotchas": {
+        "eevee_next_engine_id": 8,
+        "bpy_bmesh_namespace": 6,
+        "node_socket_interface_removed": 6
+      }
+    },
+    "on": {
+      "ops": {},
+      "nodes": {
+        "GeometryNodeRandomValue": 10
+      },
+      "gotchas": {
+        "eevee_next_engine_id": 1,
+        "node_socket_interface_removed": 1
+      }
+    }
+  },
+  "queried": {
+    "off": 0,
+    "on": 15
+  },
+  "task_fail": {
+    "floating_island": {
+      "off": 2,
+      "on": 0
+    },
+    "procedural_rocks": {
+      "off": 2,
+      "on": 3
+    }
+  },
+  "residual_on": [
+    {
+      "file": "floating_island_on_2.py",
+      "bad_ops": [],
+      "bad_nodes": [],
+      "gotchas": [
+        "eevee_next_engine_id"
+      ]
+    },
+    {
+      "file": "procedural_rocks_on_0.py",
+      "bad_ops": [],
+      "bad_nodes": [
+        "GeometryNodeRandomValue",
+        "GeometryNodeRandomValue",
+        "GeometryNodeRandomValue",
+        "GeometryNodeRandomValue"
+      ],
+      "gotchas": [
+        "node_socket_interface_removed"
+      ]
+    },
+    {
+      "file": "procedural_rocks_on_1.py",
+      "bad_ops": [],
+      "bad_nodes": [
+        "GeometryNodeRandomValue",
+        "GeometryNodeRandomValue",
+        "GeometryNodeRandomValue",
+        "GeometryNodeRandomValue"
+      ],
+      "gotchas": []
+    },
+    {
+      "file": "procedural_rocks_on_4.py",
+      "bad_ops": [],
+      "bad_nodes": [
+        "GeometryNodeRandomValue",
+        "GeometryNodeRandomValue"
+      ],
+      "gotchas": []
+    }
+  ]
+}

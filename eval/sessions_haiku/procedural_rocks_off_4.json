@@ -1,0 +1,1 @@
+{"task_id": "procedural_rocks", "rag_enabled": false, "run_index": 4, "model": "claude-haiku (headless)", "queries": [], "notes": "Moderate confidence on node socket names and rotation/scale node linking; Distribute Points density and Instance on Points inputs relied on memory—exact socket IDs for rotation/scale value propagation uncertain in 5.1."}

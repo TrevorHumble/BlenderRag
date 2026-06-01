@@ -56,6 +56,21 @@ def test_new_effect_nested_parens_not_false_flagged():
     )
 
 
+def test_bpy_bmesh_namespace_flagged():
+    assert "bpy_bmesh_namespace" in _ids("bm = bpy.bmesh.new()")
+    # the correct top-level module form is not flagged
+    assert "bpy_bmesh_namespace" not in _ids("import bmesh\nbm = bmesh.new()")
+
+
+def test_node_socket_interface_removed_flagged():
+    assert "node_socket_interface_removed" in _ids("group.inputs.new('NodeSocketFloat', 'X')")
+    assert "node_socket_interface_removed" in _ids("tree.outputs.new(type='NodeSocketInt')")
+    # the 5.x replacement is not flagged
+    assert "node_socket_interface_removed" not in _ids(
+        "tree.interface.new_socket('X', in_out='INPUT', socket_type='NodeSocketFloat')"
+    )
+
+
 def test_clean_code_has_no_hits():
     code = "import bpy\nbpy.ops.mesh.primitive_cube_add()\nob = bpy.context.object\n"
     assert detect_gotchas(code) == []

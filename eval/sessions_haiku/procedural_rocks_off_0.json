@@ -1,0 +1,1 @@
+{"task_id": "procedural_rocks", "rag_enabled": false, "run_index": 0, "model": "claude-haiku (headless)", "queries": [], "notes": "Moderate confidence in socket names for geometry nodes (InstanceOnPoints, RotateInstances, ScaleInstances, RealizeInstances); node group linking structure should work but some socket identifier names may differ in 5.1."}

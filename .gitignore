@@ -14,6 +14,9 @@ data/*.err
 index/
 *.zip
 
+# Derived API symbol table for the static eval (regenerated from the index)
+eval/api_symbols_5_1.json
+
 # Model caches
 .cache/
 hf_cache/

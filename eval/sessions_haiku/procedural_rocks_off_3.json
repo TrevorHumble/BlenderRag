@@ -1,0 +1,1 @@
+{"task_id": "procedural_rocks", "rag_enabled": false, "run_index": 3, "model": "claude-haiku (headless)", "queries": [], "notes": "Moderate confidence on 5.1 geometry nodes API; instance-on-points socket names and rotation/scale node I/O may differ from actual 5.1 implementation."}

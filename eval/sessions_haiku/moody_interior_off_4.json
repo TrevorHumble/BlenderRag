@@ -1,0 +1,1 @@
+{"task_id": "moody_interior", "rag_enabled": false, "run_index": 4, "model": "claude-haiku (headless)", "queries": [], "notes": "Script uses Eevee Next volumetrics and emissive materials; confidence in 5.1 correctness is moderate—Eevee Next API and world volumetric node syntax are inferred from memory."}
