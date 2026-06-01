@@ -68,6 +68,25 @@ def test_node_new_types_extracts_bl_idnames():
     assert node_new_types(code) == ["ShaderNodeBsdfPrincipled", "FunctionNodeRandomValue"]
 
 
+def test_node_new_types_handles_keyword_form():
+    # The canonical signature is Nodes.new(type=...); missing this was the BLOCKER bug
+    # that made the validator blind to ~75% of real node calls.
+    code = (
+        "import bpy\n"
+        "a = tree.nodes.new(type='ShaderNodeBsdfPrincipled')\n"
+        "b = nodes.new(type='FunctionNodeRandomValue')\n"
+    )
+    assert node_new_types(code) == ["ShaderNodeBsdfPrincipled", "FunctionNodeRandomValue"]
+
+
+def test_positional_and_keyword_node_forms_score_equal():
+    pos = "import bpy\nn = nodes.new('GeometryNodeRandomValue')\n"
+    kw = "import bpy\nn = nodes.new(type='GeometryNodeRandomValue')\n"
+    rp, rk = validate_code(pos, SYMBOLS), validate_code(kw, SYMBOLS)
+    assert rp.ok == rk.ok is False
+    assert rp.error_type == rk.error_type == "InvalidNodeType"
+
+
 def test_valid_node_types_pass():
     code = "import bpy\nn = mat.node_tree.nodes.new('ShaderNodeBsdfPrincipled')\n"
     assert validate_code(code, SYMBOLS).ok

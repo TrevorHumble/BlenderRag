@@ -95,11 +95,14 @@ def operator_calls(code: str) -> list[str]:
 
 
 def node_new_types(code: str) -> list[str]:
-    """Every node ``bl_idname`` passed to a ``...nodes.new('X')`` call.
+    """Every node ``bl_idname`` passed to a ``...nodes.new(...)`` call.
 
-    Matches both ``node_tree.nodes.new('ShaderNodeX')`` and a bare
-    ``nodes.new('ShaderNodeX')``; only literal string args are collected (a
-    variable bl_idname can't be checked statically). Raises on syntax error.
+    The signature is ``Nodes.new(type)``, so it matches BOTH the positional form
+    ``nodes.new('ShaderNodeX')`` AND the keyword form ``nodes.new(type='ShaderNodeX')``
+    — the latter is the dominant real-world form, and missing it (the original bug)
+    made the validator blind to ~75% of node calls. Owner may be an attribute
+    (``node_tree.nodes``) or a bare name (``nodes``). Only literal string args are
+    collected (a variable bl_idname can't be checked statically). Raises on syntax error.
     """
     tree = ast.parse(code)
     found: list[str] = []
@@ -112,10 +115,21 @@ def node_new_types(code: str) -> list[str]:
         on_nodes = (isinstance(owner, ast.Attribute) and owner.attr == "nodes") or (
             isinstance(owner, ast.Name) and owner.id == "nodes"
         )
-        if on_nodes and node.args:
-            a0 = node.args[0]
-            if isinstance(a0, ast.Constant) and isinstance(a0.value, str):
-                found.append(a0.value)
+        if not on_nodes:
+            continue
+        # positional Nodes.new('X') ...
+        if node.args and isinstance(node.args[0], ast.Constant) and isinstance(
+            node.args[0].value, str
+        ):
+            found.append(node.args[0].value)
+            continue
+        # ... or keyword Nodes.new(type='X') (the canonical form)
+        for kw in node.keywords:
+            if kw.arg == "type" and isinstance(kw.value, ast.Constant) and isinstance(
+                kw.value.value, str
+            ):
+                found.append(kw.value.value)
+                break
     return found
 
 

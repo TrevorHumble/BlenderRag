@@ -115,6 +115,18 @@ RULES: tuple[GotchaRule, ...] = (
         "Pass length= (and frame_start/frame_end) to strips.new_effect(...).",
         _new_effect_missing_length_finder,
     ),
+    GotchaRule(
+        "bpy_bmesh_namespace",
+        "bpy.bmesh does not exist; bmesh is a top-level module.",
+        "import bmesh; bm = bmesh.new()  (not bpy.bmesh.new()).",
+        _regex_finder(r"\bbpy\.bmesh\b"),
+    ),
+    GotchaRule(
+        "node_socket_interface_removed",
+        "node_group.inputs/outputs.new() was removed in 4.0; sockets moved to .interface.",
+        "Use node_tree.interface.new_socket(name, in_out='INPUT'|'OUTPUT', socket_type=...).",
+        _regex_finder(r"\.(?:inputs|outputs)\.new\("),
+    ),
 )
 
 
